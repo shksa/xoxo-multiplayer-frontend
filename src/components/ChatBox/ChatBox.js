@@ -113,11 +113,11 @@ class ChatBox extends React.Component {
     });
 
     this.socket.on('remotePeerLeftRoom', (msg) => {
-      console.log(msg);
+      console.log("remotePeerLeftRoom evt fired: ", msg);
     })
     
     this.socket.on('leftRoom', (msg) => {
-      console.log(msg);
+      console.log("leftRoom event fired: ", msg);
       this.setState({room: null})
       this.closeDataChannel()
       // If peer did not create the room, re-enter to be creator.
@@ -149,7 +149,7 @@ class ChatBox extends React.Component {
       this.peerConn.setRemoteDescription(new RTCSessionDescription(message), () => {}, logError);
 
     } else if (message.type === 'candidate') {
-      console.log('Got ice candidate.');
+      console.log('Got ice candidate');
       this.peerConn.addIceCandidate(new RTCIceCandidate({
         candidate: message.candidate
       }));
@@ -168,7 +168,7 @@ class ChatBox extends React.Component {
           type: 'candidate',
           label: event.candidate.sdpMLineIndex,
           id: event.candidate.sdpMid,
-          candidate: event.candidate.candidate
+          candidate: event.candidate.candidate,
         });
       } else {
         console.log('End of candidates.');
