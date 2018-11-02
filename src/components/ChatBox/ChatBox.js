@@ -177,7 +177,7 @@ class ChatBox extends React.Component {
   
     if (isInitiator) {
       console.log('Creating Data Channel');
-      this.dataChannel = this.peerConn.createDataChannel('textMessages');
+      this.dataChannel = this.peerConn.createDataChannel('textMessages'); // takes options as second parameter
       this.onDataChannelCreated(this.dataChannel);
   
       console.log('Creating an offer');
@@ -203,17 +203,22 @@ class ChatBox extends React.Component {
     console.log('onDataChannelCreated:', channel);
   
     channel.onopen = () => {
-      console.log('CHANNEL opened!!!');
+      console.log('Data channel opened!!!');
       this.sendMyNameToRemotePeer()
       this.setState({canSendMessages: true})
     };
+
+    channel.onerror = (err) => {
+      console.log("Data channel error", err)
+    }
   
     channel.onclose = () => {
-      console.log('Channel closed.');
+      console.log('Data channel closed.');
       this.setState({canSendMessages: false, remotePlayerName: "", allMessages: [], incomingMessages: [], outgoingMessages: []})
     }
   
     channel.onmessage = ({data}) => {
+      console.log("Got message from data channel!!!")
       this.setState((prevState) => ({
         incomingMessages: prevState.incomingMessages.concat(data),
         allMessages: prevState.allMessages.concat({type: "incoming", value: data})
