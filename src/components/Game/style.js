@@ -24,9 +24,5 @@ export const Move = styled.li`
   :hover {
     box-shadow: 2px 2px 4px #888888;
   }
-  ${({isClicked}) => isClicked && 
-  css`
-    box-shadow: 2px 2px 4px #888888;
-  `
-  };
+  ${({isClicked}) => isClicked && css`box-shadow: 2px 2px 4px #888888;`};
 `;

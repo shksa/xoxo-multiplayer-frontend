@@ -3,6 +3,6 @@ export const App = styled.div`
   height: 100vh;
   width: 100vw;
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
 `;
