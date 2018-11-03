@@ -10,12 +10,10 @@ class ChatBox extends React.Component {
   errorMsgPlaceholder = "Name cannot be empty"
 
   state = {
-    isMultiPlayerEnabled: false,
-    localPlayerName: "", remotePlayerName: "", 
-    inputPlaceholder: this.nameInputPlaceholder, 
-    canSendMessages: false, incomingMessages: [],
-    currentOutgoingMessage: "", outgoingMessages : [],
-    allMessages: [], room: null
+    isMultiPlayerEnabled: false, localPlayerName: "", remotePlayerName: "", 
+    inputPlaceholder: this.nameInputPlaceholder, incomingMessages: [], 
+    currentOutgoingMessage: "", outgoingMessages : [], allMessages: [], 
+    room: null, isDataChannelOpen: false
   }
 
   enableChatBox = () => {
@@ -32,7 +30,7 @@ class ChatBox extends React.Component {
     if (event.keyCode === 13) {
       switch (name) {
         case "currentOutgoingMessage":
-          this.sendMessageToRemotePeer()
+          this.sendDataToRemotePeer()
           break;
         case "localPlayerName":
           this.handleJoinRoomClick()
@@ -80,7 +78,7 @@ class ChatBox extends React.Component {
       console.log('This peer has joined room', room, 'with client ID', clientId);
       this.isInitiator = false;
       this.setState({room})
-      this.createPeerConnection(this.isInitiator, this.configuration);
+      this.createPeerConnection(this.isInitiator, this.configuration); // because this client needs to also open RTCPeerConnection to receive the data channel.
     });
 
     this.socket.on('remotePeerName', (remotePeerName) => {
@@ -94,22 +92,22 @@ class ChatBox extends React.Component {
       window.location.reload();
     });
     
-    this.socket.on('ready', () => {
-      console.log('Socket is ready');
+    this.socket.on('remotePeerJoinedRoom', () => {
+      console.log('Remote peer is ready to be connected, is in the same room');
       this.createPeerConnection(this.isInitiator, this.configuration);
     });
     
-    this.socket.on('log', (msg) => { console.log(msg) })
+    this.socket.on('log', (...msg) => console.log(...msg))
     
-    this.socket.on('signaling2Client4mServer', (message, remotePeerName) => {
+    this.socket.on('signalFromRemotePeer', (message, remotePeerName) => {
       console.log(`${remotePeerName} has signalled the message ${message}`)
       console.log(`${this.state.localPlayerName} received the message: ${message}`);
-      this.signalingMessageCallback(message);
+      this.processSignalFromRemotePeer(message);
     });
 
     this.socket.on('disconnect', (reason) => {
       console.log(`Disconnected from signaling Node server: ${reason}.`);
-      this.setState({canSendMessages: false})
+      // this.setState({canSendMessages: false})
     });
 
     this.socket.on('remotePeerLeftRoom', (msg) => {
@@ -119,7 +117,7 @@ class ChatBox extends React.Component {
     this.socket.on('leftRoom', (msg) => {
       console.log("leftRoom event fired: ", msg);
       this.setState({room: null})
-      this.closeDataChannel()
+      // this.closeDataChannel()
       // If peer did not create the room, re-enter to be creator.
       // if (!this.isInitiator) {
       //   window.location.reload();
@@ -132,13 +130,13 @@ class ChatBox extends React.Component {
     };
   }
 
-  sendMessageToSignalingServer = (message) => {
-    console.log(`${this.state.localPlayerName} signalling the message: ${message}`);
-    this.socket.emit('signaling2Server4mClient', message);
+  sendSignalToRemotePeerViaSignallingServer = (message) => {
+    console.log(`${this.state.localPlayerName} signalling the message to remote peer: ${message}`);
+    this.socket.emit('signalToRemotePeer', message);
   }
 
 
-  signalingMessageCallback = (message) => {
+  processSignalFromRemotePeer = (message) => {
     if (message.type === 'offer') {
       console.log('Got offer. Sending answer to peer.');
       this.peerConn.setRemoteDescription(new RTCSessionDescription(message), () => {}, logError);
@@ -150,9 +148,10 @@ class ChatBox extends React.Component {
 
     } else if (message.type === 'candidate') {
       console.log('Got ice candidate');
-      this.peerConn.addIceCandidate(new RTCIceCandidate({
-        candidate: message.candidate
-      }));
+      this.peerConn.addIceCandidate(
+        new RTCIceCandidate(
+          {candidate: message.candidate})
+        ); // triggers onicecandidate handler
     }
   }
 
@@ -164,7 +163,7 @@ class ChatBox extends React.Component {
     this.peerConn.onicecandidate = (event) => {
       console.log('icecandidate event:', event);
       if (event.candidate) {
-        this.sendMessageToSignalingServer({
+        this.sendSignalToRemotePeerViaSignallingServer({
           type: 'candidate',
           label: event.candidate.sdpMLineIndex,
           id: event.candidate.sdpMid,
@@ -183,8 +182,9 @@ class ChatBox extends React.Component {
       console.log('Creating an offer');
       this.peerConn.createOffer(this.onLocalSessionCreated, logError);
     } else {
+      // registering a handler that fires when the peer gets a datachannel from the other remote peer.
       this.peerConn.ondatachannel = (event) => {
-        console.log('ondatachannel:', event.channel);
+        console.log('Got data channel from remote peer : ', event.channel);
         this.dataChannel = event.channel;
         this.onDataChannelCreated(this.dataChannel);
       };
@@ -194,8 +194,8 @@ class ChatBox extends React.Component {
   onLocalSessionCreated = (desc) => {
     console.log('local session created:', desc);
     this.peerConn.setLocalDescription(desc, () => {
-      console.log('sending local desc:',this.peerConn.localDescription);
-      this.sendMessageToSignalingServer(this.peerConn.localDescription);
+      console.log('sending local desc to remote peer:', this.peerConn.localDescription);
+      this.sendSignalToRemotePeerViaSignallingServer(this.peerConn.localDescription);
     }, logError);
   }
 
@@ -205,7 +205,7 @@ class ChatBox extends React.Component {
     channel.onopen = () => {
       console.log('Data channel opened!!!');
       this.sendMyNameToRemotePeer()
-      this.setState({canSendMessages: true})
+      this.setState({isDataChannelOpen: true})
     };
 
     channel.onerror = (err) => {
@@ -214,7 +214,7 @@ class ChatBox extends React.Component {
   
     channel.onclose = () => {
       console.log('Data channel closed.');
-      this.setState({canSendMessages: false, remotePlayerName: "", allMessages: [], incomingMessages: [], outgoingMessages: []})
+      this.setState({isDataChannelOpen: false, remotePlayerName: "", allMessages: [], incomingMessages: [], outgoingMessages: []})
     }
   
     channel.onmessage = ({data}) => {
@@ -230,7 +230,7 @@ class ChatBox extends React.Component {
     this.socket.emit('shareMyName')
   }
 
-  sendMessageToRemotePeer = () => {
+  sendDataToRemotePeer = () => {
     const message = this.state.currentOutgoingMessage
     this.setState((prevState) => ({
       outgoingMessages: prevState.outgoingMessages.concat(message),
@@ -258,7 +258,7 @@ class ChatBox extends React.Component {
   }
 
   render() {
-    const {localPlayerName, room, remotePlayerName, inputPlaceholder, canSendMessages, isMultiPlayerEnabled, allMessages, currentOutgoingMessage}= this.state
+    const {localPlayerName, room, remotePlayerName, inputPlaceholder, isDataChannelOpen, isMultiPlayerEnabled, allMessages, currentOutgoingMessage}= this.state
     return (
       <s.ChatBoxContainer>
         {
@@ -278,7 +278,7 @@ class ChatBox extends React.Component {
             
             <s.ChatBoxFooter>
               <s.MessageInput name="currentOutgoingMessage" onChange={this.handleInputChange} value={currentOutgoingMessage}/>
-              <s.SendMessageButton onClick={this.sendMessageToRemotePeer} disabled={canSendMessages ? false : true} isDisabled={canSendMessages ? false : true}>Send</s.SendMessageButton>
+              <s.SendMessageButton onClick={this.sendDataToRemotePeer} disabled={isDataChannelOpen ? false : true} isDisabled={isDataChannelOpen ? false : true}>Send</s.SendMessageButton>
             </s.ChatBoxFooter>
           </s.ChatBox>
         </s.ChatBoxWrapper>
