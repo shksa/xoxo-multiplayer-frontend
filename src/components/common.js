@@ -32,6 +32,7 @@ export const BasicButton = styled.button`
     background-color: black;
     color: white;
   }
+  ${({levitate}) => levitate && LevitateAnimation}
 `
 
 export const BasicInputField = styled.input`
@@ -41,3 +42,27 @@ export const BasicInputField = styled.input`
   border: 2px solid black;
   outline: none;
 `;
+
+export const FlexColumnContainer = styled.div`
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid black;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const FlexRowContainer = styled.div`
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid black;
+  display: flex;
+  flex-direction: row;
+`;
+
+export const ColoredText = styled.span`
+  display: ${({block}) => block ? "block" : "inline"};
+  color: ${({color}) =>  color};
+  font-weight: ${({bold}) => bold && "bold"};
+  font-size: 1.5em;
+  margin: ${({margin}) => margin}
+`

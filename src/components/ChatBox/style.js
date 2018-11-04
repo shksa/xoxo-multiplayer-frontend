@@ -8,9 +8,13 @@ export const EnableMultiplayerButton = styled(cs.BasicButton)`
 export const ChatBoxContainer = styled.div`
   /* background-color: lightblue; */
   height: 50%;
+  ${({isMultiPlayerEnabled}) => !isMultiPlayerEnabled &&
+  css`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  `
+  }
 `;
 
 export const ChatBoxWrapper = styled.div`
@@ -20,10 +24,9 @@ export const ChatBoxWrapper = styled.div`
   justify-content: space-between;
 `;
 
-export const ChatBoxHeader = styled.div`
+export const JoiningForm = styled.div`
   display: flex;
 `
-
 
 export const NameInput = styled(cs.BasicInputField)`
   margin: 0 10px 0 10px;
@@ -32,6 +35,27 @@ export const NameInput = styled(cs.BasicInputField)`
 
 export const JoinRoomButton = styled(cs.BasicButton)`
   ${cs.LevitateAnimation};
+`;
+
+
+export const AvailablePlayersContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  height: 40%;
+  border: 2px solid black;
+  border-radius: 20px;
+`;
+
+export const AvailablePlayer = styled(cs.BasicButton)`
+  background-color: black;
+  color: white;
+  :active {
+    background-color: white;
+    color: black;
+  }
+  margin: 7px;
+  align-self: flex-start;
 `;
 
 export const ChatBox = styled.div`
@@ -78,16 +102,3 @@ export const MessageInput = styled(cs.BasicInputField)`
   flex: 1;
   margin-right: 10px;
 `
-
-export const SendMessageButton = styled(cs.BasicButton)`
-  ${({isDisabled}) => isDisabled ?
-  css`
-  background-color: lightgray;
-  color: white;
-  `
-  :
-  css`
-  ${cs.LevitateAnimation};
-  `
-  };
-`;
