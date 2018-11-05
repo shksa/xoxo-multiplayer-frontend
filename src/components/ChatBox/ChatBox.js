@@ -1,7 +1,7 @@
 import React from 'react';
 import * as s from './style'
 import * as cs from '../common'
-import { randomToken, logError } from '../../utils';
+import { logError } from '../../utils';
 import io from 'socket.io-client';
 
 
@@ -12,10 +12,16 @@ class ChatBox extends React.Component {
 
   state = {
     playerName: "", isInAvailableRoom: false, currentOutgoingMessage: "",
-    nameInputElementPlaceholder: this.normalMessagePlaceholder, incomingMessages: [], 
-    outgoingMessages : [], allMessages: [], 
+    nameInputElementPlaceholder: this.normalMessagePlaceholder, allMessages: [], 
     isDataChannelOpen: false, availablePlayers: null, gotRequestFromRemotePlayer: false,
   }
+
+  configuration = null
+  isInitiator = false
+  peerConn = null
+  dataChannel = null
+  remotePlayer = null
+  sendQueue = []
 
   handleInputChange = (event) => {
     const {name, value} = event.target
@@ -47,10 +53,12 @@ class ChatBox extends React.Component {
 
     this.socket.on('connect', () => {
       console.log("Client socket is connected ?: ", this.socket.connected); // true
+      
       this.registerToSocketEvents()
       
       this.socket.emit("registerNameWithSocket", this.state.playerName, (msg) => {
         console.log(msg)
+        
         this.socket.emit('joinAvailablePlayersRoom', (result) => {
           if (result !== "joined!") {
             console.log(result)
@@ -59,6 +67,7 @@ class ChatBox extends React.Component {
           console.log(result)
           this.setState({isInAvailableRoom: true})
         });
+        
         window.onunload = function(playerName) {
           this.dataChannel.close()
           this.socket.close()
@@ -71,12 +80,7 @@ class ChatBox extends React.Component {
     });
   }
 
-  configuration = null
-  isInitiator = false
-  peerConn = null
-  dataChannel = null
-  remotePlayer = null
-  sendQueue = []
+  
 
   registerToSocketEvents = () => {
 
@@ -87,12 +91,6 @@ class ChatBox extends React.Component {
 
     this.socket.on('ipaddr', (ipaddr) => {
       console.log('Server IP address is: ' + ipaddr);
-    });
-    
-    this.socket.on('full', (room) => {
-      alert('Room ' + room + ' is full. We will create a new room for you.');
-      window.location.hash = '';
-      window.location.reload();
     });
     
     this.socket.on('log', (...msg) => console.log(...msg))
@@ -244,7 +242,6 @@ class ChatBox extends React.Component {
     channel.onmessage = ({data}) => {
       console.log("Got message from data channel!!!")
       this.setState((prevState) => ({
-        incomingMessages: prevState.incomingMessages.concat(data),
         allMessages: prevState.allMessages.concat({type: "incoming", value: data})
       }))
     }
@@ -313,7 +310,7 @@ class ChatBox extends React.Component {
         !availablePlayers 
         ?
         <s.JoiningForm>
-          <s.NameInput name="playerName" placeholder={nameInputElementPlaceholder} onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} />
+          <s.NameInput name="playerName" autoFocus placeholder={nameInputElementPlaceholder} onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} />
           <s.JoinRoomButton onClick={this.handleJoinRoomClick}>Join room</s.JoinRoomButton> 
         </s.JoiningForm>
         :
@@ -346,7 +343,7 @@ class ChatBox extends React.Component {
             {allMessages.map(({type, value}, idx) => <s.Message incoming={type === "incoming"} key={`${type}:${idx}`}>{value}</s.Message>)}
             </s.MessageBox>
             <s.ChatBoxFooter>
-              <s.MessageInput placeholder="write a new message here..." name="currentOutgoingMessage" onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={currentOutgoingMessage} />
+              <s.MessageInput placeholder="write a new message here..." autoFocus name="currentOutgoingMessage" onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={currentOutgoingMessage} />
               <cs.BasicButton levitate onClick={this.sendDataToRemotePeer}>Send</cs.BasicButton>
             </s.ChatBoxFooter>
           </s.ChatBox>
