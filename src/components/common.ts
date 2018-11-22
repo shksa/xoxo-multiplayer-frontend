@@ -1,4 +1,4 @@
-import styled, {keyframes, css} from 'styled-components';
+import styled, {keyframes, css} from '../styled-components';
 
 const levitate = keyframes`
   0% {
@@ -19,7 +19,7 @@ export const LevitateAnimation = css`
   animation-timing-function: linear;
 `
 
-export const BasicButton = styled.button`
+export const BasicButton = styled<{levitate?: boolean}, "button">("button")`
   padding: 10px;
   font-size: 1em;
   font-weight: bold;
@@ -35,12 +35,13 @@ export const BasicButton = styled.button`
   ${({levitate}) => levitate && LevitateAnimation}
 `
 
-export const BasicInputField = styled.input`
+export const BasicInputField = styled<{levitate?: boolean}, "input">("input")`
   padding: 5px;
   font-size: 1em;
   border-radius: 10px;
   border: 2px solid black;
   outline: none;
+  ${({levitate}) => levitate && LevitateAnimation}
 `;
 
 export const FlexColumnContainer = styled.div`
@@ -59,7 +60,7 @@ export const FlexRowContainer = styled.div`
   flex-direction: row;
 `;
 
-export const ColoredText = styled.span`
+export const ColoredText = styled<{block?: boolean, color?: string, bold?: boolean, margin?: string}, "span">("span")`
   display: ${({block}) => block ? "block" : "inline"};
   color: ${({color}) =>  color};
   font-weight: ${({bold}) => bold && "bold"};

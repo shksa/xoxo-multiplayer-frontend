@@ -1,10 +1,16 @@
-import React from 'react';
-import Cell from '../Cell/Cell';
+import React from 'react'
+import Cell from '../Cell/Cell'
 import * as s from './style'
 
-class Board extends React.Component {
+export interface Props {
+  boardState: string[]
+  winningPositions: number[]
+  handlePlayerMove: (cellID: number) => void
+}
 
-  renderCell = (cellID) => {
+class Board extends React.Component<Props, {}> {
+
+  renderCell = (cellID: number) => {
     const cellValue = this.props.boardState[cellID]
     const isInWinningPosition = this.props.winningPositions && this.props.winningPositions.includes(cellID)
     return (
