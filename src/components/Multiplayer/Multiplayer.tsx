@@ -40,7 +40,6 @@ interface State {
   playerName: string
   currentOutgoingMessage: string
   placeholderForPlayerNameEle: string
-  isInAvailablePlayersRoom: boolean
   allMessages: TextMessage[]
   availablePlayers: AvailablePlayer[] | null
   peerSignal: PeerSignal | null
@@ -57,7 +56,7 @@ class Multiplayer extends React.Component<Props, State> {
     super(props)
     this.state = {
       playerName: "", currentOutgoingMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allMessages: [],
-      availablePlayers: null, peerSignal: null, isInAvailablePlayersRoom: false
+      availablePlayers: null, peerSignal: null
     }
   }
 
@@ -70,7 +69,7 @@ class Multiplayer extends React.Component<Props, State> {
   peerConn: RTCPeerConnection
   webRTCConfig: RTCConfiguration
   dataChannel: RTCDataChannel
-  selectedAvailablePlayer: AvailablePlayer
+  selectedAvailablePlayer: AvailablePlayer | null = null
 
   handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value} = event.currentTarget
@@ -184,18 +183,18 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   sendOfferToRemotePeerViaSignallingServer = (offer: OfferSignal) => {
-    console.log(`${this.state.playerName} sending an offer to remote player ${this.selectedAvailablePlayer.name}: ${offer}`);
-    this.socket.emit('signalOfferToRemotePlayer', offer, this.selectedAvailablePlayer.socketID);
+    console.log(`${this.state.playerName} sending an offer to remote player ${this.selectedAvailablePlayer!.name}: ${offer}`);
+    this.socket.emit('signalOfferToRemotePlayer', offer, this.selectedAvailablePlayer!.socketID);
   }
 
   sendCandidateToRemotePeerViaSignallingServer = (candidate: CandidateSignal) => {
-    console.log(`${this.state.playerName} sending a candidate message to remote player ${this.selectedAvailablePlayer.name}: ${candidate}`);
-    this.socket.emit('signalCandidateToRemotePlayer', candidate, this.selectedAvailablePlayer.socketID);
+    console.log(`${this.state.playerName} sending a candidate message to remote player ${this.selectedAvailablePlayer!.name}: ${candidate}`);
+    this.socket.emit('signalCandidateToRemotePlayer', candidate, this.selectedAvailablePlayer!.socketID);
   }
 
   sendAnswerToRemotePeerViaSignallingServer = (answer: AnswerSignal) => {
-    console.log(`${this.state.playerName} sending a answer to remote player ${this.selectedAvailablePlayer.name}: ${answer}`);
-    this.socket.emit('signalAnswerToRemotePlayer', answer, this.selectedAvailablePlayer.socketID);
+    console.log(`${this.state.playerName} sending a answer to remote player ${this.selectedAvailablePlayer!.name}: ${answer}`);
+    this.socket.emit('signalAnswerToRemotePlayer', answer, this.selectedAvailablePlayer!.socketID);
   }
 
 
@@ -320,7 +319,8 @@ class Multiplayer extends React.Component<Props, State> {
           return
         }
         console.log(resp)
-        this.setState({allMessages: []})
+        this.setState({allMessages: [], peerSignal: null})
+        this.selectedAvailablePlayer = null
       });
     }
   
@@ -365,7 +365,9 @@ class Multiplayer extends React.Component<Props, State> {
       case "open":
         console.log("Sending message: ", message)
         this.sendQueue.push(message);
-        this.sendQueue.forEach((message) => this.dataChannel.send(message));
+        while (this.sendQueue.length) {
+          this.dataChannel.send(this.sendQueue.shift() as string)
+        }
         this.setState((prevState) => ({
           currentOutgoingMessage: "",
           allMessages: prevState.allMessages.concat({type: "outgoing", value: message})
@@ -378,13 +380,55 @@ class Multiplayer extends React.Component<Props, State> {
         console.log("Error! Attempt to send while connection closed.");
         break;
       default:
-        console.log("should not happnen")
+        console.log("should not happen")
         break;
     }
   }
 
   handleQuitMatchAndGoBackToAvailablePool = () => {
     this.dataChannel.close()
+  }
+
+  handleViewsBasedOnDataChannel = () => {
+    const {readyState} = this.dataChannel
+
+    switch (readyState) {
+      case "closed":
+        return (
+          <AvailablePlayers 
+            handleRemotePlayerRequest={this.handleRemotePlayerRequest} 
+            handleAvailablePlayerClick={this.handleAvailablePlayerClick} 
+            playerName={this.state.playerName} 
+            availablePlayers={this.state.availablePlayers as AvailablePlayer[]} 
+            peerSignal={this.state.peerSignal} 
+            socketID={this.socket.id} 
+          />
+        )
+        break;
+    
+      case "open":
+        return (
+          <Chatbox 
+          selectedAvailablePlayer={this.selectedAvailablePlayer as AvailablePlayer}
+          playerName={this.state.playerName} 
+          allMessages={this.state.allMessages} 
+          handleEnter={this.handleEnter} 
+          sendDataToRemotePeer={this.sendDataToRemotePeer} 
+          handleQuitMatchAndGoBackToAvailablePool={this.handleQuitMatchAndGoBackToAvailablePool}
+          currentOutgoingMessage={this.state.currentOutgoingMessage}
+          handleInputChange={this.handleInputChange}
+        />
+        )
+        break;
+
+      case "connecting":
+          return (
+            <div>Loading...</div>
+          )
+        break;
+      default:
+        break;
+    }
   }
 
   render() {
@@ -403,20 +447,7 @@ class Multiplayer extends React.Component<Props, State> {
         :
         this.dataChannel
         ?
-        this.dataChannel.readyState !== "open"
-        ?
-        <div>Loading</div>
-        :
-        <Chatbox 
-          selectedAvailablePlayer={this.selectedAvailablePlayer}
-          playerName={playerName} 
-          allMessages={allMessages} 
-          handleEnter={this.handleEnter} 
-          sendDataToRemotePeer={this.sendDataToRemotePeer} 
-          handleQuitMatchAndGoBackToAvailablePool={this.handleQuitMatchAndGoBackToAvailablePool}
-          currentOutgoingMessage={currentOutgoingMessage}
-          handleInputChange={this.handleInputChange}
-        />
+        this.handleViewsBasedOnDataChannel()
         :
         <AvailablePlayers 
           handleRemotePlayerRequest={this.handleRemotePlayerRequest} 
