@@ -19,7 +19,7 @@ export const LevitateAnimation = css`
   animation-timing-function: linear;
 `
 
-export const BasicButton = styled<{levitate?: boolean}, "button">("button")`
+export const BasicButton = styled<{levitate?: boolean, isClicked?: boolean}, "button">("button")`
   padding: 10px;
   font-size: 1em;
   font-weight: bold;
@@ -33,6 +33,11 @@ export const BasicButton = styled<{levitate?: boolean}, "button">("button")`
     color: white;
   }
   ${({levitate}) => levitate && LevitateAnimation}
+  ${({isClicked}) => isClicked && `
+    background-color: black;
+    color: white;
+  `
+  }
 `
 
 export const BasicInputField = styled<{levitate?: boolean}, "input">("input")`

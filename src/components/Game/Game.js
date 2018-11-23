@@ -1,6 +1,7 @@
 import React from 'react';
 import Board from '../Board/Board';
 import * as s from './style'
+import { BasicButton } from '../common';
 
 class Game extends React.Component {
 
@@ -113,10 +114,10 @@ class Game extends React.Component {
           winner ? <h3>{winner.name} has won!</h3> : <h3>Next Player: {nextPlayer}, Symbol: {symbolOfNextPlayer}</h3>
           }
           <s.ListOfMoves>
-            <s.Move onClick={() => this.goBackToMove(0)}>Go to Game start</s.Move>
+            <s.Move><BasicButton levitate onClick={() => this.goBackToMove(0)}>Go to Game start</BasicButton></s.Move>
             {
             Object.keys(history).map((moveNum) => {
-              return <s.Move key={moveNum} isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</s.Move>
+              return <s.Move><BasicButton levitate key={moveNum} isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</BasicButton></s.Move>
             })
             }
           </s.ListOfMoves>
