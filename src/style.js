@@ -1,5 +1,5 @@
 import styled from './styled-components';
-import { FlexColumnContainer } from './components/common';
+import { CenteringDiv, BasicButton } from './components/common';
 
 
 export const App = styled.div`
@@ -10,10 +10,16 @@ export const App = styled.div`
   align-items: center;
 `;
 
-export const ErrorPopUp = styled(FlexColumnContainer)`
-  width: 30%;
-  height: 30%;
+export const GreyScreen = styled(CenteringDiv)`
+  background-color: rgba(23, 34, 45, 0.5);
+  height: 100%;
+  width: 100%;
   position: absolute;
-  left: 35%;
-  top: 35%;
+`;
+
+export const CloseButton = styled(BasicButton)`
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 100%;
 `

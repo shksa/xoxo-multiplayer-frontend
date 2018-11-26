@@ -50,6 +50,7 @@ class Game extends React.Component {
     })
   }
 
+
   handlePlayerMove = (cellID) => {
     const currentPlayer = this.state.nextPlayer
     const {boardState, winner} = this.state

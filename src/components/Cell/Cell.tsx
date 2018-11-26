@@ -9,7 +9,12 @@ export interface Props {
 
 function Cell(props: Props) {
   return (
-    <s.Cell onClick={props.handlePlayerMove} isInWinningPosition={props.isInWinningPosition}>{props.cellValue}</s.Cell>
+    <s.Cell 
+      onClick={props.handlePlayerMove} 
+      isInWinningPosition={props.isInWinningPosition}
+    >
+    {props.cellValue}
+    </s.Cell>
   )
 }
 

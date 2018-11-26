@@ -1,7 +1,6 @@
 import React from 'react';
 import * as s from './style'
 import * as cs from '../common'
-import { logError } from '../../utils';
 import io from 'socket.io-client';
 import AvailablePlayers from './AvailablePlayers/AvailablePlayers';
 import Chatbox from './ChatBox/Chatbox';
@@ -199,36 +198,43 @@ class Multiplayer extends React.Component<Props, State> {
 
 
   processSignalFromRemotePeer = async(signal: OfferSignal | AnswerSignal | CandidateSignal) => {
-    if (signal.type === 'offer') {
-      console.log('Got offer');
-      try {
-        const callerSessionDescription = new RTCSessionDescription(signal) // represents the caller's session description.
-        await this.peerConn.setRemoteDescription(callerSessionDescription) // This establishes the received offer as the description of the remote (caller's) end of the connection.
-        const localSessionDesc = await this.peerConn.createAnswer()
-        await this.peerConn.setLocalDescription(localSessionDesc) // Set's description of the local end of the connection
-        this.sendAnswerToRemotePeerViaSignallingServer(this.peerConn.localDescription as AnswerSignal)
-      } catch(err) {
-        this.props.showErrorPopup(err)
-      }
-    } 
-    else if (signal.type === 'answer') {
-      console.log('Got answer.');
-      try {
-        const calleeSessionDescription = new RTCSessionDescription(signal)
-        await this.peerConn.setRemoteDescription(calleeSessionDescription);
-      } catch(err) {
-        this.props.showErrorPopup(err)
-      }
+    switch (signal.type) {
+      case 'offer':
+        console.log('Got offer');
+        try {
+          const callerSessionDescription = new RTCSessionDescription(signal) // represents the caller's session description.
+          await this.peerConn.setRemoteDescription(callerSessionDescription) // This establishes the received offer as the description of the remote (caller's) end of the connection.
+          const localSessionDesc = await this.peerConn.createAnswer()
+          await this.peerConn.setLocalDescription(localSessionDesc) // Set's description of the local end of the connection
+          this.sendAnswerToRemotePeerViaSignallingServer(this.peerConn.localDescription as AnswerSignal)
+        } catch(err) {
+          this.props.showErrorPopup(err)
+        }
+        break;
+    
+      case 'answer':
+        console.log('Got answer.');
+        try {
+          const calleeSessionDescription = new RTCSessionDescription(signal)
+          await this.peerConn.setRemoteDescription(calleeSessionDescription);
+        } catch(err) {
+          this.props.showErrorPopup(err)
+        }
+        break;
+
+      case 'candidate':
+        console.log('Got ice candidate');
+        try {
+          const iceCandidate = new RTCIceCandidate(signal.candidate)
+          await this.peerConn.addIceCandidate(iceCandidate)
+        } catch(err) {
+          this.props.showErrorPopup(err)
+        }
+        break;
       
-    } 
-    else if (signal.type === 'candidate') {
-      console.log('Got ice candidate');
-      try {
-        const iceCandidate = new RTCIceCandidate(signal.candidate)
-        await this.peerConn.addIceCandidate(iceCandidate)
-      } catch(err) {
-        this.props.showErrorPopup(err)
-      }
+      default:
+        this.props.showErrorPopup(new Error("Got unexpected signal from remote peer."))
+        break;
     }
   }
 
@@ -389,7 +395,7 @@ class Multiplayer extends React.Component<Props, State> {
     this.dataChannel.close()
   }
 
-  handleViewsBasedOnDataChannel = () => {
+  handleViewsBasedOnDataChannelState = () => {
     const {readyState} = this.dataChannel
 
     switch (readyState) {
@@ -404,7 +410,6 @@ class Multiplayer extends React.Component<Props, State> {
             socketID={this.socket.id} 
           />
         )
-        break;
     
       case "open":
         return (
@@ -419,13 +424,12 @@ class Multiplayer extends React.Component<Props, State> {
           handleInputChange={this.handleInputChange}
         />
         )
-        break;
 
       case "connecting":
           return (
             <div>Loading...</div>
           )
-        break;
+
       default:
         break;
     }
@@ -433,7 +437,7 @@ class Multiplayer extends React.Component<Props, State> {
 
   render() {
     console.log("state in render: ", this.state)
-    const {playerName, peerSignal, availablePlayers, placeholderForPlayerNameEle, allMessages, currentOutgoingMessage}= this.state 
+    const {playerName, peerSignal, availablePlayers, placeholderForPlayerNameEle}= this.state 
     
     return (
       <s.ChatBoxContainer>
@@ -447,7 +451,7 @@ class Multiplayer extends React.Component<Props, State> {
         :
         this.dataChannel
         ?
-        this.handleViewsBasedOnDataChannel()
+        this.handleViewsBasedOnDataChannelState()
         :
         <AvailablePlayers 
           handleRemotePlayerRequest={this.handleRemotePlayerRequest} 
