@@ -38,25 +38,37 @@ export const LevitateTextAnimation = css`
   animation-timing-function: linear;
 `
 
-export const BasicButton = styled<{levitate?: boolean, isClicked?: boolean}, "button">("button")`
+const whiteTextAndBlackBackground = css`
+  background-color: black;
+  color: white;
+`
+
+const blackTextAndWhiteBackground = css`
+  background-color: white;
+  color: black;
+`
+
+export const BasicButton = styled<{whiteTextBlackBg?: boolean, levitate?: boolean, levitateText?:boolean, isClicked?: boolean}, "button">("button")`
   padding: 10px;
   font-size: 1em;
   font-weight: bold;
-  background-color: white;
   border: 2px solid black;
   border-radius: 20px;
   cursor: pointer;
   outline: none;  
+  ${blackTextAndWhiteBackground};
   :active {
-    background-color: black;
-    color: white;
-  }
-  ${({levitate}) => levitate && LevitateBoxAnimation}
-  ${({isClicked}) => isClicked && `
-    background-color: black;
-    color: white;
-  `
-  }
+    ${whiteTextAndBlackBackground};
+  };
+  ${({whiteTextBlackBg}) => whiteTextBlackBg && `
+    ${whiteTextAndBlackBackground};
+    :active {
+      ${blackTextAndWhiteBackground}
+    }
+  `};
+  ${({levitateText}) => levitateText && LevitateTextAnimation};
+  ${({levitate}) => levitate && LevitateBoxAnimation};
+  ${({isClicked}) => isClicked && whiteTextAndBlackBackground};
 `
 
 export const BasicInputField = styled<{levitate?: boolean}, "input">("input")`
@@ -68,10 +80,7 @@ export const BasicInputField = styled<{levitate?: boolean}, "input">("input")`
   ${({levitate}) => levitate && LevitateBoxAnimation}
 `;
 
-export const FlexColumnContainer = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div">("div")`
-  padding: 15px;
-  border-radius: 10px;
-  border: 2px solid black;
+export const FlexColumnDiv = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div">("div")`
   display: flex;
   flex-direction: column;
   ${({Hcenter}) => Hcenter && css`
@@ -80,26 +89,24 @@ export const FlexColumnContainer = styled<{Hcenter?: boolean, Vcenter?: boolean}
   ${({Vcenter}) => Vcenter && css`
     justify-content: center;
   `};
-`;
-
-export const ErrorPopUp = styled(FlexColumnContainer).attrs({
-  Hcenter: true,
-  Vcenter: true
-})`
-  width: 30%;
-  height: 30%;
-  background-color: black;
-  color: white;
-  font-size: 30px;
-  position: relative;
 `
 
-export const FlexRowContainer = styled.div`
+export const FlexColumnContainer = styled(FlexColumnDiv)`
   padding: 15px;
   border-radius: 10px;
   border: 2px solid black;
+`;
+
+export const FlexRowDiv = styled.div`
   display: flex;
   flex-direction: row;
+`
+
+
+export const FlexRowContainer = styled(FlexRowDiv)`
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid black;
 `;
 
 export const CenteringDiv = styled.div`

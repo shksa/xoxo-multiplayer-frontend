@@ -10,13 +10,10 @@ export const AvailablePlayersContainer = styled.div`
   border-radius: 20px;
 `;
 
-export const AvailablePlayer = styled(cs.BasicButton)`
-  background-color: black;
-  color: white;
-  :active {
-    background-color: white;
-    color: black;
-  }
+export const AvailablePlayer = styled(cs.BasicButton).attrs({
+  whiteTextBlackBg: true,
+  levitate: true
+}) `
   margin: 7px;
   align-self: flex-start;
 `;

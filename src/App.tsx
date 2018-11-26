@@ -1,19 +1,21 @@
 import React from 'react';
-import * as s from './style'
+import * as s from './AppStyle'
 import Game from './components/Game/Game';
 import Multiplayer from './components/Multiplayer/Multiplayer';
-import * as cs from './components/common'
+import StartScreen from './components/StartScreen/StartScreen';
+import { stat } from 'fs';
 
+export type GameMode = "SinglePlayer" | "MultiPlayer" | null
 interface State {
-  errorObj: Error | null
+  errorObj: Error | null,
+  gameMode: GameMode
 }
-
 
 class App extends React.Component<{}, State> {
   constructor() {
     super({});
     this.state = {
-      errorObj: null
+      errorObj: null, gameMode: null
     }
   }
 
@@ -21,20 +23,46 @@ class App extends React.Component<{}, State> {
 
   closeErrorPopup = () => this.setState({errorObj: null})
 
+  gameModeSelectionButtonHandler = (mode: GameMode) => {
+    this.setState({gameMode: mode})
+  }
+
+  showViewBasedOnGameMode = (gameMode: GameMode) => {
+    switch (gameMode) {
+      case "SinglePlayer":
+        return (
+          <Game />
+        )
+
+      case "MultiPlayer":
+        return (
+          <Multiplayer showErrorPopup={this.showErrorPopup}  />
+        )
+
+      case null:
+        return (
+          <StartScreen gameModeSelectionButtonHandler={this.gameModeSelectionButtonHandler} />
+        )
+    
+      default:
+        break;
+    }
+  }
+
   render() {
+    const {errorObj, gameMode} = this.state
     return (
       <s.App>
-        {this.state.errorObj 
+        {errorObj 
           && 
           <s.GreyScreen>
-            <cs.ErrorPopUp>
+            <s.ErrorPopUp>
               <s.CloseButton onClick={this.closeErrorPopup}>X</s.CloseButton>
-              {this.state.errorObj.message}
-            </cs.ErrorPopUp>
+              {errorObj.message}
+            </s.ErrorPopUp>
           </s.GreyScreen>
         }
-        <Game />
-        <Multiplayer showErrorPopup={this.showErrorPopup}  />
+        {this.showViewBasedOnGameMode(gameMode)}
       </s.App>
     );
   }
