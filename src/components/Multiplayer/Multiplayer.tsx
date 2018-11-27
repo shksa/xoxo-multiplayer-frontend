@@ -4,6 +4,7 @@ import * as cs from '../common'
 import io from 'socket.io-client';
 import AvailablePlayers from './AvailablePlayers/AvailablePlayers';
 import Chatbox from './ChatBox/Chatbox';
+import Game from '../Game/Game';
 
 export interface AvailablePlayer {
   name: string
@@ -403,9 +404,11 @@ class Multiplayer extends React.Component<Props, State> {
   showViewBasedOnDataChannelState = () => {
     const {playerName, allMessages, availablePlayers, currentOutgoingMessage} = this.state
     if (this.dataChannel === null) {
-      return <cs.ColoredText>
-        {availablePlayers.length >=2 ? "Select a player to play with!!!" : "There are no free players right now, please wait for some time..."}
-      </cs.ColoredText>
+      return (
+        <cs.ColoredText>
+          {availablePlayers.length >=2 ? "Select a player to play with!!!" : "There are no free players right now, please wait for some time..."}
+        </cs.ColoredText>
+      )
     }
 
     const {readyState} = this.dataChannel
@@ -417,16 +420,19 @@ class Multiplayer extends React.Component<Props, State> {
     
       case "open":
         return (
-          <Chatbox 
-            selectedAvailablePlayer={this.selectedAvailablePlayer as AvailablePlayer}
-            playerName={playerName} 
-            allMessages={allMessages} 
-            handleEnter={this.handleEnter} 
-            sendDataToRemotePeer={this.sendDataToRemotePeer} 
-            handleQuitMatchAndGoBackToAvailablePool={this.handleQuitMatchAndGoBackToAvailablePool}
-            currentOutgoingMessage={currentOutgoingMessage}
-            handleInputChange={this.handleInputChange}
-          />
+          <cs.FlexRowDiv>
+            <Game Player1Name="Bob" Player2Name="Vegana" />
+            <Chatbox 
+              selectedAvailablePlayer={this.selectedAvailablePlayer as AvailablePlayer}
+              playerName={playerName} 
+              allMessages={allMessages} 
+              handleEnter={this.handleEnter} 
+              sendDataToRemotePeer={this.sendDataToRemotePeer} 
+              handleQuitMatchAndGoBackToAvailablePool={this.handleQuitMatchAndGoBackToAvailablePool}
+              currentOutgoingMessage={currentOutgoingMessage}
+              handleInputChange={this.handleInputChange}
+            />
+          </cs.FlexRowDiv>
         )
 
       case "connecting":
@@ -500,7 +506,7 @@ class Multiplayer extends React.Component<Props, State> {
             {this.showAvailablePlayers()}
             {this.showRequests()}
           </cs.FlexRowDiv>
-          {this.showViewBasedOnDataChannelState()}
+            {this.showViewBasedOnDataChannelState()}
         </cs.FlexColumnDiv>
         }
       </s.MultiPlayer>

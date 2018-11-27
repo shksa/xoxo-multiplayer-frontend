@@ -1,9 +1,10 @@
 import React from 'react';
 import * as s from './AppStyle'
-import Game from './components/Game/Game';
+
 import Multiplayer from './components/Multiplayer/Multiplayer';
 import StartScreen from './components/StartScreen/StartScreen';
 import { stat } from 'fs';
+import Game from './components/Game/Game';
 
 export type GameMode = "SinglePlayer" | "MultiPlayer" | null
 interface State {
@@ -31,7 +32,7 @@ class App extends React.Component<{}, State> {
     switch (gameMode) {
       case "SinglePlayer":
         return (
-          <Game />
+          <Game Player1Name="Bob" Player2Name="Vegana" />
         )
 
       case "MultiPlayer":

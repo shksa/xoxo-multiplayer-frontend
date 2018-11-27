@@ -1,10 +1,11 @@
 import React from 'react'
 import Cell from '../Cell/Cell'
 import * as s from './style'
+import { BoardState } from '../Game/Game';
 
-export interface Props {
-  boardState: string[]
-  winningPositions: number[]
+interface Props {
+  boardState: BoardState
+  winningPositions: Array<number> | null
   handlePlayerMove: (cellID: number) => void
 }
 
@@ -12,12 +13,12 @@ class Board extends React.Component<Props, {}> {
 
   renderCell = (cellID: number) => {
     const cellValue = this.props.boardState[cellID]
-    const isInWinningPosition = this.props.winningPositions && this.props.winningPositions.includes(cellID)
+    const isInWinningPosition = this.props.winningPositions ? this.props.winningPositions.includes(cellID) : false
     return (
     <Cell 
       handlePlayerMove={() => this.props.handlePlayerMove(cellID)} 
       cellValue={cellValue} 
-      isInWinningPosition={isInWinningPosition} 
+      isInWinningPosition={isInWinningPosition}
     />)
   }
 
