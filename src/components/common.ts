@@ -48,7 +48,7 @@ const blackTextAndWhiteBackground = css`
   color: black;
 `
 
-export const BasicButton = styled<{whiteTextBlackBg?: boolean, levitate?: boolean, levitateText?:boolean, isClicked?: boolean}, "button">("button")`
+export const BasicButton = styled<{whiteTextBlackBg?: boolean, levitate?: boolean, isClicked?: boolean}, "button">("button")`
   padding: 10px;
   font-size: 1em;
   font-weight: bold;
@@ -66,7 +66,6 @@ export const BasicButton = styled<{whiteTextBlackBg?: boolean, levitate?: boolea
       ${blackTextAndWhiteBackground}
     }
   `};
-  ${({levitateText}) => levitateText && LevitateTextAnimation};
   ${({levitate}) => levitate && LevitateBoxAnimation};
   ${({isClicked}) => isClicked && whiteTextAndBlackBackground};
 `

@@ -5,12 +5,13 @@ import { AvailablePlayer, PeerSignal } from '../Multiplayer';
 
 interface Props {
   playerName: string
-  availablePlayers: AvailablePlayer[]
+  availablePlayers: Array<AvailablePlayer>
   socketID: string
+  selectedAvailablePlayer: AvailablePlayer | null
   handleAvailablePlayerClick: (availablePlayer: AvailablePlayer) => void
 }
 
-const AvailablePlayers = ({playerName, availablePlayers, socketID, handleAvailablePlayerClick}: Props) => {
+const AvailablePlayers = ({playerName, availablePlayers, socketID, handleAvailablePlayerClick, selectedAvailablePlayer}: Props) => {
   return (
     <cs.FlexColumnContainer>
       <cs.ColoredText bold>You are playing as <cs.ColoredText bold color="red">{playerName}</cs.ColoredText></cs.ColoredText>
@@ -22,6 +23,8 @@ const AvailablePlayers = ({playerName, availablePlayers, socketID, handleAvailab
             <s.AvailablePlayer 
               onClick={() => handleAvailablePlayerClick(player)} 
               key={player.socketID}
+              isSelected={selectedAvailablePlayer && selectedAvailablePlayer.socketID === player.socketID}
+              disabled={selectedAvailablePlayer ? selectedAvailablePlayer.socketID !== player.socketID : false}
             >
             {player.name}
             </s.AvailablePlayer>

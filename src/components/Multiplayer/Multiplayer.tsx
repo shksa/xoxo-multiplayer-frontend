@@ -479,7 +479,8 @@ class Multiplayer extends React.Component<Props, State> {
         handleAvailablePlayerClick={this.handleAvailablePlayerClick} 
         playerName={playerName} 
         availablePlayers={availablePlayers as Array<AvailablePlayer>}
-        socketID={this.socket.id} 
+        socketID={this.socket.id}
+        selectedAvailablePlayer={this.selectedAvailablePlayer} 
       />
     )
   }
