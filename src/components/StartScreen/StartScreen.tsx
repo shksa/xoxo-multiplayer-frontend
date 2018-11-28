@@ -13,10 +13,10 @@ export default class StartScreen extends Component<Props> {
     return (
       <s.StartScreen>
         <s.Pane id="0">
-          <cs.BasicButton onClick={() => gameModeSelectionButtonHandler("SinglePlayer")} whiteTextBlackBg levitate>Single Player</cs.BasicButton>
+          <cs.BasicButton onClick={() => gameModeSelectionButtonHandler(GameMode.SinglePlayer)} whiteTextBlackBg levitate>Single Player</cs.BasicButton>
         </s.Pane>
         <s.Pane id="1">
-          <cs.BasicButton onClick={() => gameModeSelectionButtonHandler("MultiPlayer")} levitate>Multi Player</cs.BasicButton>
+          <cs.BasicButton onClick={() => gameModeSelectionButtonHandler(GameMode.MultiPlayer)} levitate>Multi Player</cs.BasicButton>
         </s.Pane>
       </s.StartScreen>
     )

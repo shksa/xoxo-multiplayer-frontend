@@ -1,12 +1,10 @@
 import styled, {css} from "../../../styled-components";
 import * as cs from '../../common'
 
-export const AvailablePlayersContainer = styled.div`
-  display: flex;
+export const AvailablePlayersContainer = styled(cs.FlexRowContainer)`
   flex-wrap: wrap;
   padding: 10px;
   height: 40%;
-  border: 2px solid black;
   border-radius: 20px;
 `;
 

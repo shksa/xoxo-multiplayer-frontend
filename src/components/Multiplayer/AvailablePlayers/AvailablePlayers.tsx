@@ -17,9 +17,20 @@ const AvailablePlayers = ({playerName, availablePlayers, socketID, handleAvailab
       <cs.ColoredText margin="10px 0 5px 0" block bold>Available players:</cs.ColoredText>
       <s.AvailablePlayersContainer>
       {
-        availablePlayers.map(player => player.socketID !== socketID && <s.AvailablePlayer onClick={() => handleAvailablePlayerClick(player)} key={player.socketID}>{player.name}</s.AvailablePlayer>)
+        availablePlayers.map(player => 
+          player.socketID !== socketID && 
+            <s.AvailablePlayer 
+              onClick={() => handleAvailablePlayerClick(player)} 
+              key={player.socketID}
+            >
+            {player.name}
+            </s.AvailablePlayer>
+        )
       }
       </s.AvailablePlayersContainer>
+      <cs.ColoredText>
+        {availablePlayers.length >=2 ? "Select a player to play with!!!" : "There are no free players right now, please wait for some time..."}
+      </cs.ColoredText>
     </cs.FlexColumnContainer>
   )
 }

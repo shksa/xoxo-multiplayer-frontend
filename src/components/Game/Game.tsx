@@ -6,7 +6,7 @@ import { BasicButton } from '../common';
 enum PlayerSymbol {
   X = "X",
   O = "O",
-}  // This is a String Literal Type. "X" is both the type and it's value. This allows you to specify the exact value a string must have.
+}
 interface PlayerInfo {
   name: string
   symbol: PlayerSymbol

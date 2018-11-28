@@ -3,13 +3,16 @@ import * as s from './AppStyle'
 
 import Multiplayer from './components/Multiplayer/Multiplayer';
 import StartScreen from './components/StartScreen/StartScreen';
-import { stat } from 'fs';
 import Game from './components/Game/Game';
 
-export type GameMode = "SinglePlayer" | "MultiPlayer" | null
+// GameMode is a union of SinglePlayer and MultiPlayer type
+export enum GameMode {
+  SinglePlayer = "SinglePlayer", // The enum member SinglePlayer can be used as a type, and the only value of that type is the string "SinglePlayer"
+  MultiPlayer = "MultiPlayer"
+}
 interface State {
   errorObj: Error | null,
-  gameMode: GameMode
+  gameMode: GameMode | null
 }
 
 class App extends React.Component<{}, State> {
@@ -20,22 +23,20 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  showErrorPopup = (errorObj: Error) => {this.setState({errorObj})}
+  showErrorPopup = (errorObj: Error) => this.setState({errorObj})
 
   closeErrorPopup = () => this.setState({errorObj: null})
 
-  gameModeSelectionButtonHandler = (mode: GameMode) => {
-    this.setState({gameMode: mode})
-  }
+  gameModeSelectionButtonHandler = (mode: GameMode) => this.setState({gameMode: mode})
 
-  showViewBasedOnGameMode = (gameMode: GameMode) => {
+  showViewBasedOnGameMode = (gameMode: GameMode | null) => { // GameMode is a union of SinglePlayer and MultiPlayer type
     switch (gameMode) {
-      case "SinglePlayer":
+      case GameMode.SinglePlayer: // Here, the enum member is used as value
         return (
           <Game Player1Name="Bob" Player2Name="Vegana" />
         )
 
-      case "MultiPlayer":
+      case GameMode.MultiPlayer:
         return (
           <Multiplayer showErrorPopup={this.showErrorPopup}  />
         )
