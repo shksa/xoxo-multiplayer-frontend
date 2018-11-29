@@ -13,6 +13,14 @@ export const MultiPlayer = styled(cs.FlexColumnDiv).attrs({
   };
 `;
 
+export const MultiPlayerWrapper = styled(cs.FlexColumnDiv).attrs({
+  Vcenter: true,
+  Hcenter: true
+})`
+  height: 100%;
+  width: 100%;
+`
+
 export const JoiningForm = styled(cs.FlexRowDiv)``
 
 export const NameInput = styled(cs.BasicInputField)`

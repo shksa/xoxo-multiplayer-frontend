@@ -435,7 +435,7 @@ class Multiplayer extends React.Component<Props, State> {
         if (this.state.isInAvailablePlayersRoom) {
           return (
             <cs.ColoredText>
-            <cs.ColoredText color="red">{this.selectedAvailablePlayer!.name}</cs.ColoredText> has <cs.ColoredText color="red">REJECTED</cs.ColoredText> your request to play. Choose another player.
+              <cs.ColoredText color="red">{this.selectedAvailablePlayer!.name}</cs.ColoredText> has <cs.ColoredText color="red">REJECTED</cs.ColoredText> your request to play. Choose another player.
             </cs.ColoredText>
           )
         }
@@ -444,19 +444,24 @@ class Multiplayer extends React.Component<Props, State> {
     
       case "open":
         return (
-          <cs.FlexRowDiv>
-            <Game Player1Name="Bob" Player2Name="Vegana" />
-            <Chatbox 
-              selectedAvailablePlayer={this.selectedAvailablePlayer as AvailablePlayer}
-              playerName={playerName} 
+          <cs.FlexColumnDiv Hcenter>
+            <cs.ColoredText block bold>Connected with <cs.ColoredText color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText></cs.ColoredText>
+            <Game 
+              Player1Name={this.isInitiator ? playerName : this.selectedAvailablePlayer!.name} 
+              Player2Name={this.isInitiator ? this.selectedAvailablePlayer!.name : playerName} 
+            />
+            <cs.FlexRowContainer>
+              <cs.ColoredText>Quit match and join the available pool again?</cs.ColoredText>
+              <cs.BasicButton onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
+            </cs.FlexRowContainer>
+            <Chatbox
               allMessages={allMessages} 
               handleEnter={this.handleEnter} 
               sendDataToRemotePeer={this.sendDataToRemotePeer} 
-              handleQuitMatchAndGoBackToAvailablePool={this.handleQuitMatchAndGoBackToAvailablePool}
               currentOutgoingMessage={currentOutgoingMessage}
               handleInputChange={this.handleInputChange}
             />
-          </cs.FlexRowDiv>
+          </cs.FlexColumnDiv>
         )
 
       case "connecting":
@@ -477,7 +482,6 @@ class Multiplayer extends React.Component<Props, State> {
     return (
       <AvailablePlayers 
         handleAvailablePlayerClick={this.handleAvailablePlayerClick} 
-        playerName={playerName} 
         availablePlayers={availablePlayers as Array<AvailablePlayer>}
         socketID={this.socket.id}
         selectedAvailablePlayer={this.selectedAvailablePlayer} 
@@ -526,13 +530,14 @@ class Multiplayer extends React.Component<Props, State> {
           <cs.BasicButton levitate onClick={this.handleJoinRoomClick}>Join room</cs.BasicButton> 
         </s.JoiningForm>
         :
-        <cs.FlexColumnDiv Hcenter>
+        <s.MultiPlayerWrapper>
+          <cs.ColoredText block bold>You are playing as <cs.ColoredText bold color="red">{playerName}</cs.ColoredText></cs.ColoredText>
           <cs.FlexRowDiv>
             {this.showAvailablePlayers()}
             {this.showRequestsFromPlayers()}
           </cs.FlexRowDiv>
-            {this.showViewBasedOnDataChannelState()}
-        </cs.FlexColumnDiv>
+          {this.showViewBasedOnDataChannelState()}
+        </s.MultiPlayerWrapper>
         }
       </s.MultiPlayer>
     );

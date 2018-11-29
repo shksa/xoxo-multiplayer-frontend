@@ -1,7 +1,8 @@
 import React from 'react';
 import Board from '../Board/Board';
 import * as s from './style'
-import { BasicButton } from '../common';
+import * as cs from '../common';
+import { stat } from 'fs';
 
 enum PlayerSymbol {
   X = "X",
@@ -65,14 +66,14 @@ class Game extends React.Component<Props, State> {
     }
   }
 
-  togglePlayer = (player: PlayerType) => {
+  togglePlayer = (player: PlayerType) : PlayerType => {
     if (player === PlayerType.Player1) {
       return PlayerType.Player2
     }
     return PlayerType.Player1
   }
 
-  getSymbolOfPlayer = (player: PlayerType) => {
+  getSymbolOfPlayer = (player: PlayerType) : PlayerSymbol => {
     const symbolOfPlayer = this.state[player].symbol
     return symbolOfPlayer
   }
@@ -122,7 +123,7 @@ class Game extends React.Component<Props, State> {
     this.recordMoveInHistory(newBoardState, nextPlayer)
   }
 
-  checkForWin = (boardState: BoardState, currentPlayer: PlayerType) => {
+  checkForWin = (boardState: BoardState, currentPlayer: PlayerType) : GameResult | null => {
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -160,16 +161,19 @@ class Game extends React.Component<Props, State> {
     const symbolOfNextPlayer = this.getSymbolOfPlayer(nextPlayer)
     return (
       <s.Game>
-        <Board boardState={boardState} handlePlayerMove={this.handlePlayerMove} winningPositions={winner && winner.winningCellPositions}/>
+        <cs.FlexColumnDiv>
+          <cs.ColoredText>Player1 is {this.state.Player1.name}, Player2 is {this.state.Player2.name}</cs.ColoredText>
+          <Board boardState={boardState} handlePlayerMove={this.handlePlayerMove} winningPositions={winner && winner.winningCellPositions}/>
+        </cs.FlexColumnDiv>
         <s.History>
           {
-          winner ? <h3>{winner.winningPlayer} has won!</h3> : <h3>Next Player: {nextPlayer}, Symbol: {symbolOfNextPlayer}</h3>
+          winner ? <h3>{winner.winningPlayer} has won!</h3> : <h3>Next Player: {this.state[nextPlayer].name}, Symbol: {symbolOfNextPlayer}</h3>
           }
           <s.ListOfMoves>
-            <s.Move><BasicButton levitate onClick={() => this.goBackToMove(0)}>Go to Game start</BasicButton></s.Move>
+            <s.Move><cs.BasicButton levitate onClick={() => this.goBackToMove(0)}>Go to Game start</cs.BasicButton></s.Move>
             {
             Array.from(history.keys()).map((moveNum) => {
-              return <s.Move><BasicButton levitate key={moveNum} isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</BasicButton></s.Move>
+              return <s.Move><cs.BasicButton levitate key={moveNum} isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</cs.BasicButton></s.Move>
             })
             }
           </s.ListOfMoves>
