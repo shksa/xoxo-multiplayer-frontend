@@ -4,7 +4,7 @@ import * as s from './style'
 import * as cs from '../common';
 import { stat } from 'fs';
 
-enum PlayerSymbol {
+export enum PlayerSymbol {
   X = "X",
   O = "O",
 }
@@ -37,6 +37,8 @@ interface GameResult {
 }
 
 interface State {
+  playerName: string
+  opponentName: string
   Player1: PlayerInfo
   Player2: PlayerInfo
   nextPlayer: PlayerType
@@ -47,8 +49,10 @@ interface State {
 }
 
 interface Props {
-  Player1Name: string
-  Player2Name: string
+  player1Name: string
+  player2Name: string
+  playerName: string
+  opponentName: string
 }
 
 class Game extends React.Component<Props, State> {
@@ -56,8 +60,10 @@ class Game extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      Player1: {name: props.Player1Name, symbol: PlayerSymbol.X}, 
-      Player2: {name: props.Player2Name, symbol: PlayerSymbol.O},
+      playerName: props.playerName,
+      opponentName: props.opponentName,
+      Player1: {name: props.player1Name, symbol: PlayerSymbol.X}, 
+      Player2: {name: props.player2Name, symbol: PlayerSymbol.O},
       nextPlayer: PlayerType.Player1,
       boardState: Array(9).fill(null),
       moveInHistory: null,
@@ -157,13 +163,22 @@ class Game extends React.Component<Props, State> {
   }
 
   render() {
-    const {nextPlayer, boardState, history, moveInHistory, winner} = this.state
+    const {nextPlayer, boardState, history, moveInHistory, winner, Player1, Player2, playerName, opponentName} = this.state
     const symbolOfNextPlayer = this.getSymbolOfPlayer(nextPlayer)
+    const waitForOpponentMove = this.state[nextPlayer].name !== playerName
     return (
       <s.Game>
-        <cs.FlexColumnDiv>
-          <cs.ColoredText>Player1 is {this.state.Player1.name}, Player2 is {this.state.Player2.name}</cs.ColoredText>
-          <Board boardState={boardState} handlePlayerMove={this.handlePlayerMove} winningPositions={winner && winner.winningCellPositions}/>
+        <cs.FlexColumnDiv Hcenter>
+          <cs.ColoredText>You are {Player1.name === playerName ? "Player1" : "Player2"} </cs.ColoredText>
+          {waitForOpponentMove 
+          ? <cs.ColoredText bold>Waiting for <cs.ColoredText color="blue" bold>{opponentName}</cs.ColoredText> to make a move...</cs.ColoredText> 
+          : <cs.ColoredText bold>Make a move!!</cs.ColoredText>}
+          <Board
+            waitForOpponentMove={waitForOpponentMove}
+            boardState={boardState} 
+            handlePlayerMove={this.handlePlayerMove} 
+            winningPositions={winner && winner.winningCellPositions}
+          />
         </cs.FlexColumnDiv>
         <s.History>
           {

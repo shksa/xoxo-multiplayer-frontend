@@ -33,7 +33,7 @@ class App extends React.Component<{}, State> {
     switch (gameMode) {
       case GameMode.SinglePlayer: // Here, the enum member is used as value
         return (
-          <Game Player1Name="Bob" Player2Name="Vegana" />
+          <Game opponentName="Vegana" playerName="Bob" player1Name="Bob" player2Name="Vegana" />
         )
 
       case GameMode.MultiPlayer:

@@ -4,8 +4,9 @@ import * as cs from '../common'
 import io from 'socket.io-client';
 import AvailablePlayers from './AvailablePlayers/AvailablePlayers';
 import Chatbox from './ChatBox/Chatbox';
-import Game from '../Game/Game';
+import Game, { PlayerSymbol } from '../Game/Game';
 import { stat } from 'fs';
+import { Http2SecureServer } from 'http2';
 
 export interface AvailablePlayer {
   name: string
@@ -32,18 +33,48 @@ export interface PeerSignal {
   candidate: CandidateSignal | null
 }
 
-export interface TextMessage {
-  type: "incoming" | "outgoing"
-  value: any
+export enum TextMessageTypes {
+  IncomingTextMessage = "IncomingTextMessage",
+  OutgoingTextMessage = "OutgoingTextMessage"
 }
+
+export interface IncomingTextMessage {
+  type: TextMessageTypes.IncomingTextMessage
+  value: string
+}
+
+export interface OutgoingTextMessage {
+  type: TextMessageTypes.OutgoingTextMessage
+  value: string
+}
+
+// TextMessage is the type of an object that contains text messages which are sent over the WebRTC connection.
+export type TextMessage = IncomingTextMessage | OutgoingTextMessage
+
+// PlayerMoveSymbol is the type of an object that contains the player move symbol which is sent over the WebRTC connection.
+export interface PlayerMoveSymbol {
+  type: "PlayerMoveSymbol"
+  value: PlayerSymbol
+}
+
+// Payload is the type of an object which is sent over the WebRTC connection. The object can be of type TextMessage or PlayerMoveSymbol
+export type Payload = TextMessage | PlayerMoveSymbol
+
+type SendQueue = Array<Payload>
+
+export type AllTextMessages = Array<TextMessage>
+
+type RequestsFromPlayers = Map<string, PeerSignal>
+
+type AvailablePlayers = Array<AvailablePlayer>
 
 interface State {
   playerName: string
-  currentOutgoingMessage: string
+  currentOutgoingTextMessage: string
   placeholderForPlayerNameEle: string
-  allMessages: Array<TextMessage>
-  availablePlayers: Array<AvailablePlayer>
-  requestsFromPlayers: Map<string, PeerSignal>
+  allTextMessages: AllTextMessages
+  availablePlayers: AvailablePlayers
+  requestsFromPlayers: RequestsFromPlayers
   isInAvailablePlayersRoom: boolean
 }
 
@@ -57,7 +88,7 @@ class Multiplayer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      playerName: "", currentOutgoingMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allMessages: [],
+      playerName: "", currentOutgoingTextMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allTextMessages: [],
       availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false
     }
   }
@@ -66,14 +97,14 @@ class Multiplayer extends React.Component<Props, State> {
   onErrorPlaceholder = "Name cannot be empty"
   opponentName =  ""
   isInitiator = false 
-  sendQueue: Array<string> = []
+  sendQueue: SendQueue = []
   socket: SocketIOClient.Socket // Not initializing this member beacuse it doesnt need to be initialized.
   peerConn: RTCPeerConnection
   webRTCConfig: RTCConfiguration
   dataChannel: RTCDataChannel | null = null
   selectedAvailablePlayer: AvailablePlayer | null = null
 
-  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleInputChange : React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const {name, value} = event.currentTarget
     switch (name) {
       case "playerName":
@@ -81,17 +112,21 @@ class Multiplayer extends React.Component<Props, State> {
         break
     
       case "currentOutgoingMessage":
-        this.setState({currentOutgoingMessage: value})
+        this.setState({currentOutgoingTextMessage: value})
         break
     }
   }
 
-  handleEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  handleEnter : React.KeyboardEventHandler<HTMLInputElement> = (event) => {
     const {name} = event.currentTarget
     if (event.key === "Enter") {
       switch (name) {
         case "currentOutgoingMessage":
-          this.sendDataToRemotePeer()
+          const outgoingTextMessage: OutgoingTextMessage = {
+            type: TextMessageTypes.OutgoingTextMessage, 
+            value: this.state.currentOutgoingTextMessage
+          }
+          this.sendDataToRemotePeer(outgoingTextMessage)
           break;
       
         case "playerName":
@@ -99,6 +134,14 @@ class Multiplayer extends React.Component<Props, State> {
           break;
       }
     }
+  }
+
+  handleSendTextMessageButton : React.MouseEventHandler<HTMLButtonElement> = () => {
+    const outgoingTextMessage: OutgoingTextMessage = {
+      type: TextMessageTypes.OutgoingTextMessage, 
+      value: this.state.currentOutgoingTextMessage
+    }
+    this.sendDataToRemotePeer(outgoingTextMessage)
   }
 
   handleJoinRoomClick = () => {
@@ -344,15 +387,21 @@ class Multiplayer extends React.Component<Props, State> {
           return
         }
         console.log(resp)
-        this.setState({allMessages: [], isInAvailablePlayersRoom: true})
+        this.setState({allTextMessages: [], isInAvailablePlayersRoom: true})
         this.selectedAvailablePlayer = null
       });
     }
   
     channel.onmessage = (evt: MessageEvent) => {
-      console.log("Got message from data channel!!!")
+      console.log("Got payload from data channel!!!")
+      const payload: Payload = JSON.parse(evt.data)
+      if (payload.type === "PlayerMoveSymbol") {
+        console.log("got PlayerMoveSymbol: ", payload.value)
+        return
+      }
+      const incomingTextMessage: IncomingTextMessage = {type: TextMessageTypes.IncomingTextMessage, value: payload.value}
       this.setState((prevState) => ({
-        allMessages: prevState.allMessages.concat({type: "incoming", value: evt.data})
+        allTextMessages: prevState.allTextMessages.concat(incomingTextMessage)
       }))
     }
   }
@@ -388,26 +437,27 @@ class Multiplayer extends React.Component<Props, State> {
     this.processSignalFromRemotePeer(peerSignal.candidate as CandidateSignal)
   }
 
-  sendDataToRemotePeer = () => {
-    const message = this.state.currentOutgoingMessage
+  sendDataToRemotePeer = (payload: Payload) => {
     switch(this.dataChannel!.readyState) {
       case "connecting":
-        console.log("Connection not open; queueing: " + message);
-        this.sendQueue.push(message);
+        console.log("Connection not open; queueing: " + payload);
+        this.sendQueue.push(payload);
         break;
       case "open":
-        console.log("Sending message: ", message)
-        this.sendQueue.push(message);
+        console.log("Sending data: ", payload)
+        this.sendQueue.push(payload);
         while (this.sendQueue.length) {
-          this.dataChannel!.send(this.sendQueue.shift() as string)
+          this.dataChannel!.send(JSON.stringify(this.sendQueue.shift()))
         }
-        this.setState((prevState) => ({
-          currentOutgoingMessage: "",
-          allMessages: prevState.allMessages.concat({type: "outgoing", value: message})
-        }))
+        if (payload.type === TextMessageTypes.OutgoingTextMessage) {
+          this.setState((prevState) => ({
+            currentOutgoingTextMessage: "",
+            allTextMessages: prevState.allTextMessages.concat(payload)
+          }))
+        }
         break;
       case "closing":
-        console.log("Attempted to send message while closing: " + message);
+        console.log("Attempted to send message while closing: " + payload);
         break;
       case "closed":
         console.log("Error! Attempt to send while connection closed.");
@@ -423,7 +473,7 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   showViewBasedOnDataChannelState = () => {
-    const {playerName, allMessages, availablePlayers, currentOutgoingMessage} = this.state
+    const {playerName, allTextMessages, availablePlayers, currentOutgoingTextMessage} = this.state
     if (this.dataChannel === null) {
       return
     }
@@ -446,19 +496,21 @@ class Multiplayer extends React.Component<Props, State> {
         return (
           <cs.FlexColumnDiv Hcenter>
             <cs.ColoredText block bold>Connected with <cs.ColoredText color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText></cs.ColoredText>
-            <Game 
-              Player1Name={this.isInitiator ? playerName : this.selectedAvailablePlayer!.name} 
-              Player2Name={this.isInitiator ? this.selectedAvailablePlayer!.name : playerName} 
+            <Game
+              playerName={playerName}
+              opponentName={this.selectedAvailablePlayer!.name}
+              player1Name={this.isInitiator ? playerName : this.selectedAvailablePlayer!.name} 
+              player2Name={this.isInitiator ? this.selectedAvailablePlayer!.name : playerName} 
             />
             <cs.FlexRowContainer>
               <cs.ColoredText>Quit match and join the available pool again?</cs.ColoredText>
               <cs.BasicButton onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
             </cs.FlexRowContainer>
             <Chatbox
-              allMessages={allMessages} 
-              handleEnter={this.handleEnter} 
-              sendDataToRemotePeer={this.sendDataToRemotePeer} 
-              currentOutgoingMessage={currentOutgoingMessage}
+              allTextMessages={allTextMessages} 
+              handleEnter={this.handleEnter}
+              handleSendTextMessageButton={this.handleSendTextMessageButton}
+              currentOutgoingMessage={currentOutgoingTextMessage}
               handleInputChange={this.handleInputChange}
             />
           </cs.FlexColumnDiv>

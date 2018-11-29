@@ -4,6 +4,7 @@ import * as s from './style'
 import { BoardState } from '../Game/Game';
 
 interface Props {
+  waitForOpponentMove: boolean
   boardState: BoardState
   winningPositions: Array<number> | null
   handlePlayerMove: (cellID: number) => void
@@ -23,8 +24,12 @@ class Board extends React.Component<Props, {}> {
   }
 
   render() {
+    const {waitForOpponentMove} = this.props
     return (
       <s.Board>
+        <s.WaitingOverlay waitForOpponentMove={waitForOpponentMove}>
+          <s.Hourglass />
+        </s.WaitingOverlay>
         <s.Row>
           {this.renderCell(0)}
           {this.renderCell(1)}

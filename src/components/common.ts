@@ -108,11 +108,10 @@ export const FlexRowContainer = styled(FlexRowDiv)`
   border: 2px solid black;
 `;
 
-export const CenteringDiv = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`
+export const CenteringDiv = styled(FlexColumnDiv).attrs({
+  Hcenter: true,
+  Vcenter: true,
+})``
 
 export const ColoredText = styled<{block?: boolean, color?: string, bold?: boolean, margin?: string}, "span">("span")`
   display: ${({block}) => block ? "block" : "inline"};
