@@ -1,4 +1,5 @@
 import styled, {keyframes, css} from '../styled-components';
+import ThreeDotLoaderSVG from '../assets/ThreeDotLoader.svg'
 
 const levitateText = keyframes`
   0% {
@@ -119,4 +120,11 @@ export const ColoredText = styled<{block?: boolean, color?: string, bold?: boole
   font-weight: ${({bold}) => bold && "bold"};
   font-size: 1.5em;
   margin: ${({margin}) => margin}
+`
+
+export const ThreeDotLoader = styled.img.attrs({
+  src: ThreeDotLoaderSVG
+})`
+  height: 100px;
+  width: 100px;
 `

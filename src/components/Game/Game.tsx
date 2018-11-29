@@ -3,6 +3,7 @@ import Board from '../Board/Board';
 import * as s from './style'
 import * as cs from '../common';
 import { stat } from 'fs';
+import { GameMode } from '../../App';
 
 export enum PlayerSymbol {
   X = "X",
@@ -46,13 +47,16 @@ interface State {
   moveInHistory: number | null
   history: GameHistory
   winner: GameResult | null
+  gameMode: GameMode
 }
 
 interface Props {
+  gameMode: GameMode
   player1Name: string
   player2Name: string
   playerName: string
   opponentName: string
+  sendPlayerMoveCellIDToOpponent?: (cellID: number) => void
 }
 
 class Game extends React.Component<Props, State> {
@@ -60,6 +64,7 @@ class Game extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
+      gameMode: props.gameMode,
       playerName: props.playerName,
       opponentName: props.opponentName,
       Player1: {name: props.player1Name, symbol: PlayerSymbol.X}, 
@@ -88,11 +93,6 @@ class Game extends React.Component<Props, State> {
     const {history, moveInHistory} = this.state
     const historyTillNow = new Map(history)
     if (moveInHistory !== null) {
-      
-      // for (let move = 1; move <= moveInHistory; move++) {
-      //   const boardState = history.get(move)
-      //   newHistory.set(move, boardState)
-      // }
       const currMoveNo = moveInHistory + 1
       const newHistory = historyTillNow.set(currMoveNo, {nextPlayer, boardState: newBoardState})
       this.setState({
@@ -110,14 +110,24 @@ class Game extends React.Component<Props, State> {
   }
 
 
-  handlePlayerMove = (cellID: number) => {
+  handlePlayerMove = (cellID: number, moveBySelf: boolean) => {
+
+    if (moveBySelf && this.state.gameMode === GameMode.MultiPlayer) {
+      this.props.sendPlayerMoveCellIDToOpponent!(cellID)
+    }
+
     const currentPlayer = this.state.nextPlayer
+    
     const {boardState, winner} = this.state
+    
     const symbolOfCurrPlayer = this.getSymbolOfPlayer(currentPlayer)
+    
     if (boardState[cellID] !== null || winner !== null) {
       return
     }
+    
     const newBoardState = boardState.slice()
+    
     newBoardState[cellID] = symbolOfCurrPlayer
 
     const result = this.checkForWin(newBoardState, currentPlayer)
@@ -163,16 +173,32 @@ class Game extends React.Component<Props, State> {
   }
 
   render() {
-    const {nextPlayer, boardState, history, moveInHistory, winner, Player1, Player2, playerName, opponentName} = this.state
+    // nextPlayer is the player that is gonna play now.
+    const {nextPlayer, boardState, history, moveInHistory, winner, Player1, playerName, opponentName} = this.state
     const symbolOfNextPlayer = this.getSymbolOfPlayer(nextPlayer)
-    const waitForOpponentMove = this.state[nextPlayer].name !== playerName
+    const waitForOpponentMove = winner ? false : this.state[nextPlayer].name !== playerName
+    const isPlayer1 = Player1.name === playerName
     return (
       <s.Game>
         <cs.FlexColumnDiv Hcenter>
-          <cs.ColoredText>You are {Player1.name === playerName ? "Player1" : "Player2"} </cs.ColoredText>
-          {waitForOpponentMove 
-          ? <cs.ColoredText bold>Waiting for <cs.ColoredText color="blue" bold>{opponentName}</cs.ColoredText> to make a move...</cs.ColoredText> 
-          : <cs.ColoredText bold>Make a move!!</cs.ColoredText>}
+          {/* <cs.ColoredText>You are {isPlayer1 ? "Player1" : "Player2"} </cs.ColoredText> */}
+          {
+          waitForOpponentMove ? 
+          <cs.ColoredText bold>Waiting for <cs.ColoredText color="blue" bold>{opponentName}</cs.ColoredText> to make a move...</cs.ColoredText> 
+          : 
+          winner ? 
+          <cs.ColoredText bold>
+            You 
+            {
+            this.state[winner.winningPlayer].name === playerName ? 
+            <cs.ColoredText color="red"> won </cs.ColoredText> 
+            : 
+            <cs.ColoredText color="red"> lost </cs.ColoredText> 
+            } 
+            the match!</cs.ColoredText>
+          :
+          <cs.ColoredText bold>Make a move!!</cs.ColoredText>
+          }
           <Board
             waitForOpponentMove={waitForOpponentMove}
             boardState={boardState} 
@@ -182,13 +208,13 @@ class Game extends React.Component<Props, State> {
         </cs.FlexColumnDiv>
         <s.History>
           {
-          winner ? <h3>{winner.winningPlayer} has won!</h3> : <h3>Next Player: {this.state[nextPlayer].name}, Symbol: {symbolOfNextPlayer}</h3>
+          winner ? <cs.ColoredText bold>Game over!</cs.ColoredText> : <cs.ColoredText bold>Next Player: {this.state[nextPlayer].name}, Symbol: {symbolOfNextPlayer}</cs.ColoredText>
           }
           <s.ListOfMoves>
             <s.Move><cs.BasicButton levitate onClick={() => this.goBackToMove(0)}>Go to Game start</cs.BasicButton></s.Move>
             {
             Array.from(history.keys()).map((moveNum) => {
-              return <s.Move><cs.BasicButton levitate key={moveNum} isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</cs.BasicButton></s.Move>
+              return <s.Move key={moveNum}><cs.BasicButton levitate  isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</cs.BasicButton></s.Move>
             })
             }
           </s.ListOfMoves>

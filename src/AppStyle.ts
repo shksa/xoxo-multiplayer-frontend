@@ -5,6 +5,7 @@ import * as cs from './components/common';
 export const App = styled(cs.FlexRowDiv)`
   height: 100vh;
   width: 100vw;
+  font-family: sans-serif;
 `;
 
 export const GreyScreen = styled(cs.CenteringDiv)`

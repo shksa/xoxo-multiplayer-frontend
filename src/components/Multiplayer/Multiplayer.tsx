@@ -4,9 +4,9 @@ import * as cs from '../common'
 import io from 'socket.io-client';
 import AvailablePlayers from './AvailablePlayers/AvailablePlayers';
 import Chatbox from './ChatBox/Chatbox';
-import Game, { PlayerSymbol } from '../Game/Game';
-import { stat } from 'fs';
-import { Http2SecureServer } from 'http2';
+import Game from '../Game/Game';
+import { GameMode } from '../../App';
+import StandardHTMLColorNames from '../../assets/StandardHTMLColorNames.json'
 
 export interface AvailablePlayer {
   name: string
@@ -51,14 +51,14 @@ export interface OutgoingTextMessage {
 // TextMessage is the type of an object that contains text messages which are sent over the WebRTC connection.
 export type TextMessage = IncomingTextMessage | OutgoingTextMessage
 
-// PlayerMoveSymbol is the type of an object that contains the player move symbol which is sent over the WebRTC connection.
-export interface PlayerMoveSymbol {
-  type: "PlayerMoveSymbol"
-  value: PlayerSymbol
+// PlayerMoveCellID is the type of an object that contains the player move symbol which is sent over the WebRTC connection.
+export interface PlayerMoveCellID {
+  type: "PlayerMoveCellID"
+  value: number
 }
 
 // Payload is the type of an object which is sent over the WebRTC connection. The object can be of type TextMessage or PlayerMoveSymbol
-export type Payload = TextMessage | PlayerMoveSymbol
+export type Payload = TextMessage | PlayerMoveCellID
 
 type SendQueue = Array<Payload>
 
@@ -76,6 +76,7 @@ interface State {
   availablePlayers: AvailablePlayers
   requestsFromPlayers: RequestsFromPlayers
   isInAvailablePlayersRoom: boolean
+  colorName: string
 }
 
 interface Props {
@@ -89,10 +90,30 @@ class Multiplayer extends React.Component<Props, State> {
     super(props)
     this.state = {
       playerName: "", currentOutgoingTextMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allTextMessages: [],
-      availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false
+      availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false, colorName: "white"
+    }
+    this.GameComponentChild = React.createRef<Game>()
+    this.colorNameGenerator = this.getColorNameGenerator()
+    setInterval(this.setNewColorToState, 1000)
+  }
+
+  *getColorNameGenerator() {
+    let i = 0
+    while (i < StandardHTMLColorNames.length){
+      yield StandardHTMLColorNames[i]
+      i = i + 1
+      if (i === StandardHTMLColorNames.length) {
+        i = 0
+      }
     }
   }
 
+  setNewColorToState = () => {
+    this.setState({colorName: this.colorNameGenerator.next().value})
+  }
+
+  colorNameGenerator: Generator
+  GameComponentChild: React.RefObject<Game>
   defaultPlaceholder = "Enter player name"
   onErrorPlaceholder = "Name cannot be empty"
   opponentName =  ""
@@ -389,14 +410,19 @@ class Multiplayer extends React.Component<Props, State> {
         console.log(resp)
         this.setState({allTextMessages: [], isInAvailablePlayersRoom: true})
         this.selectedAvailablePlayer = null
+        this.dataChannel = null
       });
     }
   
     channel.onmessage = (evt: MessageEvent) => {
       console.log("Got payload from data channel!!!")
       const payload: Payload = JSON.parse(evt.data)
-      if (payload.type === "PlayerMoveSymbol") {
-        console.log("got PlayerMoveSymbol: ", payload.value)
+      if (payload.type === "PlayerMoveCellID") {
+        console.log("got PlayerMoveCellID: ", payload.value)
+        // make handlePlayerMove execute in Game component which is a child of this component.
+        // so make a method in child comp execute from the parent comp.
+        // Using a reference to the child comp and trigerring the method.
+        this.GameComponentChild.current!.handlePlayerMove(payload.value, false)
         return
       }
       const incomingTextMessage: IncomingTextMessage = {type: TextMessageTypes.IncomingTextMessage, value: payload.value}
@@ -468,12 +494,17 @@ class Multiplayer extends React.Component<Props, State> {
     }
   }
 
+  sendPlayerMoveCellIDToOpponent = (cellID: number) => {
+    const playerMoveCellID: PlayerMoveCellID = {type: "PlayerMoveCellID", value: cellID}
+    this.sendDataToRemotePeer(playerMoveCellID)
+  }
+
   handleQuitMatchAndGoBackToAvailablePool = () => {
     this.dataChannel!.close()
   }
 
   showViewBasedOnDataChannelState = () => {
-    const {playerName, allTextMessages, availablePlayers, currentOutgoingTextMessage} = this.state
+    const {playerName, allTextMessages, currentOutgoingTextMessage} = this.state
     if (this.dataChannel === null) {
       return
     }
@@ -497,6 +528,9 @@ class Multiplayer extends React.Component<Props, State> {
           <cs.FlexColumnDiv Hcenter>
             <cs.ColoredText block bold>Connected with <cs.ColoredText color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText></cs.ColoredText>
             <Game
+              gameMode={GameMode.MultiPlayer}
+              ref={this.GameComponentChild}
+              sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
               playerName={playerName}
               opponentName={this.selectedAvailablePlayer!.name}
               player1Name={this.isInitiator ? playerName : this.selectedAvailablePlayer!.name} 
@@ -527,15 +561,15 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   showAvailablePlayers = () => {
-    const {playerName, availablePlayers} = this.state
+    const {availablePlayers} = this.state
     if (availablePlayers.length === 0) {
       return null
     }
+    const availablePlayersExceptSelf = availablePlayers.filter((player) => player.socketID !== this.socket.id)
     return (
       <AvailablePlayers 
         handleAvailablePlayerClick={this.handleAvailablePlayerClick} 
-        availablePlayers={availablePlayers as Array<AvailablePlayer>}
-        socketID={this.socket.id}
+        availablePlayers={availablePlayersExceptSelf}
         selectedAvailablePlayer={this.selectedAvailablePlayer} 
       />
     )
@@ -569,17 +603,17 @@ class Multiplayer extends React.Component<Props, State> {
 
   render() {
     console.log("state in render: ", this.state)
-    const {playerName, placeholderForPlayerNameEle, isInAvailablePlayersRoom}= this.state
+    const {playerName, placeholderForPlayerNameEle, isInAvailablePlayersRoom, colorName}= this.state
     const showJoiningForm = isInAvailablePlayersRoom === false && this.dataChannel === null ? true : false
     console.log("showJoiningForm: ", showJoiningForm)
     return (
-      <s.MultiPlayer showJoiningForm>
+      <s.MultiPlayer showJoiningForm colorName={colorName}>
         {
         showJoiningForm
         ?
         <s.JoiningForm>
           <s.NameInput levitate name="playerName" autoFocus placeholder={placeholderForPlayerNameEle} onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} />
-          <cs.BasicButton levitate onClick={this.handleJoinRoomClick}>Join room</cs.BasicButton> 
+          <cs.BasicButton levitate onClick={this.handleJoinRoomClick}>Join room</cs.BasicButton>
         </s.JoiningForm>
         :
         <s.MultiPlayerWrapper>

@@ -3,10 +3,12 @@ import * as cs from '../../common'
 
 export const ChatBox = styled(cs.FlexColumnContainer)`
   height: 40%;
+  width: 30%;
   position: absolute;
   right: 0px;
   bottom: 0px;
   justify-content: space-around;
+  background-color: antiquewhite;
 `
 
 export const MessageBox = styled(cs.FlexColumnContainer)`
@@ -14,6 +16,8 @@ export const MessageBox = styled(cs.FlexColumnContainer)`
   overflow: scroll;
   justify-content: flex-end;
   box-sizing: border-box;
+  background-color: cornsilk;
+  font-family: cursive;
 `;
 
 export const ChatBoxFooter = styled(cs.FlexRowDiv)``
@@ -21,6 +25,8 @@ export const ChatBoxFooter = styled(cs.FlexRowDiv)``
 export const MessageInput = styled(cs.BasicInputField)`
   flex: 1;
   margin-right: 10px;
+  background-color: cornsilk;
+  font-family: cursive;
 `
 
 export const Message = styled<{incoming: boolean}, "div">("div")`

@@ -7,7 +7,7 @@ interface Props {
   waitForOpponentMove: boolean
   boardState: BoardState
   winningPositions: Array<number> | null
-  handlePlayerMove: (cellID: number) => void
+  handlePlayerMove: (cellID: number, moveBySelf: boolean) => void
 }
 
 class Board extends React.Component<Props, {}> {
@@ -17,7 +17,7 @@ class Board extends React.Component<Props, {}> {
     const isInWinningPosition = this.props.winningPositions ? this.props.winningPositions.includes(cellID) : false
     return (
     <Cell 
-      handlePlayerMove={() => this.props.handlePlayerMove(cellID)} 
+      handlePlayerMove={() => this.props.handlePlayerMove(cellID, true)} 
       cellValue={cellValue} 
       isInWinningPosition={isInWinningPosition}
     />)
@@ -28,7 +28,7 @@ class Board extends React.Component<Props, {}> {
     return (
       <s.Board>
         <s.WaitingOverlay waitForOpponentMove={waitForOpponentMove}>
-          <s.Hourglass />
+          <s.ThreeDotLoader />
         </s.WaitingOverlay>
         <s.Row>
           {this.renderCell(0)}

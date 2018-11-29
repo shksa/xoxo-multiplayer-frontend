@@ -3,9 +3,14 @@ import * as cs from '../common'
 
 export const MultiPlayer = styled(cs.FlexColumnDiv).attrs({
   Hcenter: true
-})<{showJoiningForm: boolean}>`
+})<{showJoiningForm: boolean, colorName: string}>`
   height: 100%;
   width: 100%;
+  transition-property: "background-color";
+  transition-duration: 1s;
+  transition-delay: 0.5s;
+  transition-timing-function: ease-in-out;
+  background-color: ${({colorName}) => colorName};
   ${({showJoiningForm}) => showJoiningForm ? `
     justify-content: center;  
   `:`
