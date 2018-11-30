@@ -1,11 +1,22 @@
-import styled from './styled-components';
+import styled, {createGlobalStyle} from './styled-components';
 import * as cs from './components/common';
+import ThemeInterface from './theme';
 
+export const GlobalStyle = createGlobalStyle`
+  @import url("https://fonts.googleapis.com/css?family=Montserrat:400,900|Roboto");
 
-export const App = styled(cs.FlexRowDiv)`
+  body {
+    padding: 0;
+    margin: 0;
+    font-family: Roboto, sans-serif;
+  }
+`;
+
+export const Theme: ThemeInterface = {primaryColor: "white", primaryColorInverted: "black", bgColor: "white"}
+
+export const AppWrapper = styled(cs.FlexRowDiv)`
   height: 100vh;
   width: 100vw;
-  font-family: sans-serif;
 `;
 
 export const GreyScreen = styled(cs.CenteringDiv)`

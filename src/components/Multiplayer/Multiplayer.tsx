@@ -92,28 +92,32 @@ class Multiplayer extends React.Component<Props, State> {
       playerName: "", currentOutgoingTextMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allTextMessages: [],
       availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false, colorName: "white"
     }
-    this.GameComponentChild = React.createRef<Game>()
+    this.gameComponentChild = React.createRef<Game>()
+    this.multiPlayerChild = React.createRef<any>()
+    this.nameInputChild = React.createRef<any>()
     this.colorNameGenerator = this.getColorNameGenerator()
-    setInterval(this.setNewColorToState, 1000)
   }
 
   *getColorNameGenerator() {
     let i = 0
     while (i < StandardHTMLColorNames.length){
       yield StandardHTMLColorNames[i]
-      i = i + 1
+      i += 1
       if (i === StandardHTMLColorNames.length) {
         i = 0
       }
     }
   }
 
-  setNewColorToState = () => {
-    this.setState({colorName: this.colorNameGenerator.next().value})
+  setNewColor = () => {
+    this.multiPlayerChild.current!.style.backgroundColor = this.colorNameGenerator.next().value
+    this.nameInputChild.current!.style.backgroundColor = this.colorNameGenerator.next().value
   }
 
   colorNameGenerator: Generator
-  GameComponentChild: React.RefObject<Game>
+  nameInputChild: React.RefObject<any>
+  multiPlayerChild: React.RefObject<any>
+  gameComponentChild: React.RefObject<Game>
   defaultPlaceholder = "Enter player name"
   onErrorPlaceholder = "Name cannot be empty"
   opponentName =  ""
@@ -422,7 +426,7 @@ class Multiplayer extends React.Component<Props, State> {
         // make handlePlayerMove execute in Game component which is a child of this component.
         // so make a method in child comp execute from the parent comp.
         // Using a reference to the child comp and trigerring the method.
-        this.GameComponentChild.current!.handlePlayerMove(payload.value, false)
+        this.gameComponentChild.current!.handlePlayerMove(payload.value, false)
         return
       }
       const incomingTextMessage: IncomingTextMessage = {type: TextMessageTypes.IncomingTextMessage, value: payload.value}
@@ -529,7 +533,7 @@ class Multiplayer extends React.Component<Props, State> {
             <cs.ColoredText block bold>Connected with <cs.ColoredText color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText></cs.ColoredText>
             <Game
               gameMode={GameMode.MultiPlayer}
-              ref={this.GameComponentChild}
+              ref={this.gameComponentChild}
               sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
               playerName={playerName}
               opponentName={this.selectedAvailablePlayer!.name}
@@ -601,13 +605,17 @@ class Multiplayer extends React.Component<Props, State> {
     )
   }
 
+  componentDidMount = () => {
+    setInterval(this.setNewColor, 1200)
+  }
+
   render() {
     console.log("state in render: ", this.state)
     const {playerName, placeholderForPlayerNameEle, isInAvailablePlayersRoom, colorName}= this.state
     const showJoiningForm = isInAvailablePlayersRoom === false && this.dataChannel === null ? true : false
     console.log("showJoiningForm: ", showJoiningForm)
     return (
-      <s.MultiPlayer showJoiningForm colorName={colorName}>
+      <s.MultiPlayer showJoiningForm colorName={colorName} ref={this.multiPlayerChild}>
         {
         showJoiningForm
         ?

@@ -1,5 +1,12 @@
-import styled, {keyframes, css} from '../styled-components';
+import styled, {keyframes, css} from '../styled-components'
 import ThreeDotLoaderSVG from '../assets/ThreeDotLoader.svg'
+
+export const EverChangingBackgroundColor = css`
+  transition-property: "background-color";
+  transition-duration: 1s;
+  transition-delay: 0s;
+  transition-timing-function: ease-in-out;
+`
 
 const levitateText = keyframes`
   0% {
@@ -127,4 +134,8 @@ export const ThreeDotLoader = styled.img.attrs({
 })`
   height: 100px;
   width: 100px;
+`
+
+export const Loader1 = styled.svg`
+  src: Loader1SVG
 `

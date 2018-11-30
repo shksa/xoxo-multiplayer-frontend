@@ -29,7 +29,9 @@ const AvailablePlayers = ({availablePlayers, handleAvailablePlayerClick, selecte
           <s.AvailablePlayersContainer>{JSXofAvailablePlayers}</s.AvailablePlayersContainer>
         </cs.FlexColumnDiv>
         :
-        <cs.ThreeDotLoader />
+        <cs.FlexRowDiv>
+          <cs.ThreeDotLoader />
+        </cs.FlexRowDiv>
       }
       <cs.ColoredText>
         {availablePlayers.length ? "Select a player to play with!!!" : "There are no free players right now, please wait for some time..."}

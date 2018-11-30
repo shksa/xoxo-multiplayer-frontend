@@ -1,9 +1,9 @@
 import React from 'react';
 import * as s from './AppStyle'
-
 import Multiplayer from './components/Multiplayer/Multiplayer';
 import StartScreen from './components/StartScreen/StartScreen';
 import Game from './components/Game/Game';
+import { ThemeProvider } from "./styled-components";
 
 // GameMode is a union of SinglePlayer and MultiPlayer type
 export enum GameMode {
@@ -54,18 +54,23 @@ class App extends React.Component<{}, State> {
   render() {
     const {errorObj, gameMode} = this.state
     return (
-      <s.App>
-        {errorObj 
-          && 
-          <s.GreyScreen>
-            <s.ErrorPopUp>
-              <s.CloseButton onClick={this.closeErrorPopup}>X</s.CloseButton>
-              {errorObj.message}
-            </s.ErrorPopUp>
-          </s.GreyScreen>
-        }
-        {this.showViewBasedOnGameMode(gameMode)}
-      </s.App>
+      <ThemeProvider theme={s.Theme}>
+        <React.Fragment>
+          <s.GlobalStyle />
+          <s.AppWrapper>
+            {errorObj 
+              && 
+              <s.GreyScreen>
+                <s.ErrorPopUp>
+                  <s.CloseButton onClick={this.closeErrorPopup}>X</s.CloseButton>
+                  {errorObj.message}
+                </s.ErrorPopUp>
+              </s.GreyScreen>
+            }
+            {this.showViewBasedOnGameMode(gameMode)}
+          </s.AppWrapper>
+        </React.Fragment>
+      </ThemeProvider>
     );
   }
 }
