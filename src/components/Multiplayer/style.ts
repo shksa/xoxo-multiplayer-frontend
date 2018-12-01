@@ -6,7 +6,7 @@ export const MultiPlayer = styled(cs.FlexColumnDiv).attrs({
 })<{showJoiningForm: boolean, colorName: string}>`
   height: 100%;
   width: 100%;
-  ${cs.EverChangingBackgroundColor};
+  ${cs.EverChanging("background-color")};
   ${({showJoiningForm}) => showJoiningForm ? `
     justify-content: center;  
   `:`
@@ -21,7 +21,11 @@ export const MultiPlayerWrapper = styled(cs.CenteringDiv)`
 
 export const JoiningForm = styled(cs.FlexRowDiv)``
 
-export const NameInput = styled(cs.BasicInputField)`
+export const NameInput = styled(cs.BasicInputField).attrs({
+  levitate: true,
+  placeholderColor: "black",
+  transitionProp: "background-color",
+})`
   margin: 0 10px 0 10px;
 `;
 

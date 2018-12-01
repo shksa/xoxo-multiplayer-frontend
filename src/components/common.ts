@@ -1,8 +1,7 @@
 import styled, {keyframes, css} from '../styled-components'
-import ThreeDotLoaderSVG from '../assets/ThreeDotLoader.svg'
 
-export const EverChangingBackgroundColor = css`
-  transition-property: "background-color";
+export const EverChanging = (transitionProp : string) => css`
+  transition-property: ${transitionProp};
   transition-duration: 1s;
   transition-delay: 0s;
   transition-timing-function: ease-in-out;
@@ -56,7 +55,7 @@ const blackTextAndWhiteBackground = css`
   color: black;
 `
 
-export const BasicButton = styled<{whiteTextBlackBg?: boolean, levitate?: boolean, isClicked?: boolean}, "button">("button")`
+export const BasicButton = styled<{transitionProp?:string, whiteTextBlackBg?: boolean, levitate?: boolean, isClicked?: boolean}, "button">("button")`
   padding: 10px;
   font-size: 1em;
   font-weight: bold;
@@ -76,15 +75,29 @@ export const BasicButton = styled<{whiteTextBlackBg?: boolean, levitate?: boolea
   `};
   ${({levitate}) => levitate && LevitateBoxAnimation};
   ${({isClicked}) => isClicked && whiteTextAndBlackBackground};
+  ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
 `
 
-export const BasicInputField = styled<{levitate?: boolean}, "input">("input")`
+export const BasicInputField = styled<{transitionProp?:string, levitate?: boolean, placeholderColor?: string}, "input">("input")`
   padding: 5px;
   font-size: 1em;
+  font-weight: bold;
   border-radius: 10px;
   border: 2px solid black;
   outline: none;
-  ${({levitate}) => levitate && LevitateBoxAnimation}
+  ${({levitate}) => levitate && LevitateBoxAnimation};
+  ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: ${({placeholderColor}) => placeholderColor};
+    opacity: 1; /* Firefox */
+  };
+  :-ms-input-placeholder { /* Internet Explorer 10-11 */
+      color: ${({placeholderColor}) => placeholderColor};
+  };
+
+  ::-ms-input-placeholder { /* Microsoft Edge */
+      color: ${({placeholderColor}) => placeholderColor};
+  };
+  ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
 `;
 
 export const FlexColumnDiv = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div">("div")`
@@ -98,16 +111,22 @@ export const FlexColumnDiv = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div
   `};
 `
 
+export const FlexRowDiv = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div">("div")`
+  display: flex;
+  flex-direction: row;
+  ${({Hcenter}) => Hcenter && css`
+    justify-content: center;
+  `};
+  ${({Vcenter}) => Vcenter && css`
+    align-items: center;
+  `};
+`
+
 export const FlexColumnContainer = styled(FlexColumnDiv)`
   padding: 15px;
   border-radius: 10px;
   border: 2px solid black;
 `;
-
-export const FlexRowDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-`
 
 
 export const FlexRowContainer = styled(FlexRowDiv)`
@@ -127,15 +146,4 @@ export const ColoredText = styled<{block?: boolean, color?: string, bold?: boole
   font-weight: ${({bold}) => bold && "bold"};
   font-size: 1.5em;
   margin: ${({margin}) => margin}
-`
-
-export const ThreeDotLoader = styled.img.attrs({
-  src: ThreeDotLoaderSVG
-})`
-  height: 100px;
-  width: 100px;
-`
-
-export const Loader1 = styled.svg`
-  src: Loader1SVG
 `

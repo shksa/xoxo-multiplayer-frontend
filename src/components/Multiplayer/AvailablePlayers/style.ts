@@ -1,11 +1,11 @@
 import styled, {css} from "../../../styled-components";
 import * as cs from '../../common'
 
-export const AvailablePlayersContainer = styled(cs.FlexRowContainer)`
+export const AvailablePlayersContainer = styled(cs.FlexRowDiv).attrs({
+  Vcenter: true
+})`
   flex-wrap: wrap;
-  padding: 10px;
-  height: 40%;
-  border-radius: 20px;
+  margin: 10px;
 `;
 
 export const AvailablePlayer = styled(cs.BasicButton).attrs({

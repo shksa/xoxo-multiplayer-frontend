@@ -1,8 +1,7 @@
 import React from 'react';
-import Board from '../Board/Board';
+import Board from './Board/Board';
 import * as s from './style'
 import * as cs from '../common';
-import { stat } from 'fs';
 import { GameMode } from '../../App';
 
 export enum PlayerSymbol {
@@ -181,7 +180,6 @@ class Game extends React.Component<Props, State> {
     return (
       <s.Game>
         <cs.FlexColumnDiv Hcenter>
-          {/* <cs.ColoredText>You are {isPlayer1 ? "Player1" : "Player2"} </cs.ColoredText> */}
           {
           waitForOpponentMove ? 
           <cs.ColoredText bold>Waiting for <cs.ColoredText color="blue" bold>{opponentName}</cs.ColoredText> to make a move...</cs.ColoredText> 

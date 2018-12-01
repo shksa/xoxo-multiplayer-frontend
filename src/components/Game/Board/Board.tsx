@@ -1,7 +1,9 @@
 import React from 'react'
 import Cell from '../Cell/Cell'
 import * as s from './style'
-import { BoardState } from '../Game/Game';
+import { BoardState } from '../Game';
+import * as cs from '../../common'
+import * as loaders from '../../Loaders/Loaders';
 
 interface Props {
   waitForOpponentMove: boolean
@@ -28,7 +30,7 @@ class Board extends React.Component<Props, {}> {
     return (
       <s.Board>
         <s.WaitingOverlay waitForOpponentMove={waitForOpponentMove}>
-          <s.ThreeDotLoader />
+          <loaders.ThreeBallsLoader fillColor="white"/>
         </s.WaitingOverlay>
         <s.Row>
           {this.renderCell(0)}

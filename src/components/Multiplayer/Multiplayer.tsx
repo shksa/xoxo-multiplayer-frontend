@@ -7,6 +7,7 @@ import Chatbox from './ChatBox/Chatbox';
 import Game from '../Game/Game';
 import { GameMode } from '../../App';
 import StandardHTMLColorNames from '../../assets/StandardHTMLColorNames.json'
+import * as loaders from '../Loaders/Loaders'
 
 export interface AvailablePlayer {
   name: string
@@ -86,6 +87,22 @@ interface Props {
 
 class Multiplayer extends React.Component<Props, State> {
 
+  colorNameGenerator: Generator
+  buttonRef: React.RefObject<any>
+  nameInputChild: React.RefObject<any>
+  multiPlayerChild: React.RefObject<any>
+  gameComponentChild: React.RefObject<Game>
+  defaultPlaceholder = "Enter player name"
+  onErrorPlaceholder = "Name cannot be empty"
+  opponentName =  ""
+  isInitiator = false 
+  sendQueue: SendQueue = []
+  socket: SocketIOClient.Socket // Not initializing this member beacuse it doesnt need to be initialized.
+  peerConn: RTCPeerConnection
+  webRTCConfig: RTCConfiguration
+  dataChannel: RTCDataChannel | null = null
+  selectedAvailablePlayer: AvailablePlayer | null = null
+
   constructor(props: Props) {
     super(props)
     this.state = {
@@ -95,6 +112,7 @@ class Multiplayer extends React.Component<Props, State> {
     this.gameComponentChild = React.createRef<Game>()
     this.multiPlayerChild = React.createRef<any>()
     this.nameInputChild = React.createRef<any>()
+    this.buttonRef = React.createRef<any>()
     this.colorNameGenerator = this.getColorNameGenerator()
   }
 
@@ -110,24 +128,10 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   setNewColor = () => {
-    this.multiPlayerChild.current!.style.backgroundColor = this.colorNameGenerator.next().value
-    this.nameInputChild.current!.style.backgroundColor = this.colorNameGenerator.next().value
+    this.multiPlayerChild.current ? this.multiPlayerChild.current.style.backgroundColor = this.colorNameGenerator.next().value : ""
+    this.nameInputChild.current ? this.nameInputChild.current.style.backgroundColor = this.colorNameGenerator.next().value : ""
+    this.buttonRef.current ? this.buttonRef.current.style.backgroundColor = this.colorNameGenerator.next().value : ""
   }
-
-  colorNameGenerator: Generator
-  nameInputChild: React.RefObject<any>
-  multiPlayerChild: React.RefObject<any>
-  gameComponentChild: React.RefObject<Game>
-  defaultPlaceholder = "Enter player name"
-  onErrorPlaceholder = "Name cannot be empty"
-  opponentName =  ""
-  isInitiator = false 
-  sendQueue: SendQueue = []
-  socket: SocketIOClient.Socket // Not initializing this member beacuse it doesnt need to be initialized.
-  peerConn: RTCPeerConnection
-  webRTCConfig: RTCConfiguration
-  dataChannel: RTCDataChannel | null = null
-  selectedAvailablePlayer: AvailablePlayer | null = null
 
   handleInputChange : React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const {name, value} = event.currentTarget
@@ -556,7 +560,10 @@ class Multiplayer extends React.Component<Props, State> {
 
       case "connecting":
           return (
-            <cs.ColoredText>Waiting to hear back from {this.selectedAvailablePlayer!.name}</cs.ColoredText>
+            <cs.FlexColumnDiv Hcenter>
+              <loaders.BarsLoader width="60" height="60"/>
+              <cs.ColoredText bold>Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText> </cs.ColoredText>
+            </cs.FlexColumnDiv>
           )
 
       default:
@@ -606,7 +613,7 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   componentDidMount = () => {
-    setInterval(this.setNewColor, 1200)
+    setInterval(this.setNewColor, 1000)
   }
 
   render() {
@@ -620,8 +627,11 @@ class Multiplayer extends React.Component<Props, State> {
         showJoiningForm
         ?
         <s.JoiningForm>
-          <s.NameInput levitate name="playerName" autoFocus placeholder={placeholderForPlayerNameEle} onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} />
-          <cs.BasicButton levitate onClick={this.handleJoinRoomClick}>Join room</cs.BasicButton>
+          <s.NameInput 
+            ref={this.nameInputChild} name="playerName" autoFocus placeholder={placeholderForPlayerNameEle} 
+            onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} 
+          />
+          <cs.BasicButton transitionProp="background-color" ref={this.buttonRef} levitate onClick={this.handleJoinRoomClick}>Join room</cs.BasicButton>
         </s.JoiningForm>
         :
         <s.MultiPlayerWrapper>

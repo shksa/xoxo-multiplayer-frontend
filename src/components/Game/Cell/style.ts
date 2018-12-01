@@ -1,5 +1,5 @@
-import styled, {css} from '../../styled-components';
-import { LevitateTextAnimation } from '../common';
+import styled, {css} from '../../../styled-components';
+import { LevitateTextAnimation } from '../../common';
 
 // You will need to define both the custom props and the type of tag which will be used.
 export const Cell = styled<{ isInWinningPosition: boolean }, "button">("button")`
