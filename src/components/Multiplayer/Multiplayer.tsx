@@ -561,7 +561,7 @@ class Multiplayer extends React.Component<Props, State> {
       case "connecting":
           return (
             <cs.FlexColumnDiv Hcenter>
-              <loaders.BarsLoader width="60" height="60"/>
+              <loaders.BarsLoader width="100" height="100"/>
               <cs.ColoredText bold>Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText> </cs.ColoredText>
             </cs.FlexColumnDiv>
           )
