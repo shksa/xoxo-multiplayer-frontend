@@ -102,6 +102,7 @@ class Multiplayer extends React.Component<Props, State> {
   webRTCConfig: RTCConfiguration
   dataChannel: RTCDataChannel | null = null
   selectedAvailablePlayer: AvailablePlayer | null = null
+  socketServerAddress: string 
 
   constructor(props: Props) {
     super(props)
@@ -114,6 +115,13 @@ class Multiplayer extends React.Component<Props, State> {
     this.nameInputChild = React.createRef<any>()
     this.buttonRef = React.createRef<any>()
     this.colorNameGenerator = this.getColorNameGenerator()
+
+    if (process.env.NODE_ENV === "development") {
+      this.socketServerAddress = process.env.REACT_APP_DEV_SOCKET_SERVER_ADDRESS as string
+    } else {
+      this.socketServerAddress = process.env.REACT_APP_PROD_SOCKET_SERVER_ADDRESS as string
+    }
+    console.log("Using socketServerAddress: ", this.socketServerAddress)
   }
 
   *getColorNameGenerator() {
@@ -179,8 +187,8 @@ class Multiplayer extends React.Component<Props, State> {
       return
     }
 
-    this.socket = io({
-      path: "/socketConnectionNamespace"
+    this.socket = io(this.socketServerAddress, {
+      path: '/xoxo-multiplayer-socketConnectionNamespace'
     })
 
     this.socket.on('connect', () => {
@@ -563,7 +571,7 @@ class Multiplayer extends React.Component<Props, State> {
       case "connecting":
           return (
             <cs.FlexColumnDiv Hcenter>
-              <BarsLoader width="100" height="100" fill="pink"/>
+              <BarsLoader width="100" height="100" fill="white"/>
               <cs.ColoredText bold>Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText> </cs.ColoredText>
             </cs.FlexColumnDiv>
           )

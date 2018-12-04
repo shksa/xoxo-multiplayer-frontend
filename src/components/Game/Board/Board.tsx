@@ -29,7 +29,7 @@ class Board extends React.Component<Props, {}> {
     return (
       <s.Board>
         <s.WaitingOverlay waitForOpponentMove={waitForOpponentMove}>
-          <ThreeBallsLoader fill="white"/>
+          <ThreeBallsLoader width="140" height="50" fill="white"/>
         </s.WaitingOverlay>
         <s.Row>
           {this.renderCell(0)}
