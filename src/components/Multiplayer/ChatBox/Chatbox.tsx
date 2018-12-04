@@ -1,7 +1,7 @@
 import React from 'react'
 import * as cs from '../../common'
 import * as s from './style'
-import { PeerSignal, TextMessage, AvailablePlayer, Payload, AllTextMessages, TextMessageTypes } from '../Multiplayer';
+import { AllTextMessages, TextMessageTypes } from '../Multiplayer';
 
 interface Props {
   currentOutgoingMessage: string

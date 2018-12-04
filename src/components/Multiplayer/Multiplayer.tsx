@@ -6,8 +6,8 @@ import AvailablePlayers from './AvailablePlayers/AvailablePlayers';
 import Chatbox from './ChatBox/Chatbox';
 import Game from '../Game/Game';
 import { GameMode } from '../../App';
-import StandardHTMLColorNames from '../../assets/StandardHTMLColorNames.json'
-import * as loaders from '../Loaders/Loaders'
+import * as utils from '../../utils/util'
+import {ReactComponent as BarsLoader} from '../../assets/BarsLoader.svg'
 
 export interface AvailablePlayer {
   name: string
@@ -118,10 +118,10 @@ class Multiplayer extends React.Component<Props, State> {
 
   *getColorNameGenerator() {
     let i = 0
-    while (i < StandardHTMLColorNames.length){
-      yield StandardHTMLColorNames[i]
+    while (i < utils.StandardHTMLColorNames.length){
+      yield utils.StandardHTMLColorNames[i]
       i += 1
-      if (i === StandardHTMLColorNames.length) {
+      if (i === utils.StandardHTMLColorNames.length) {
         i = 0
       }
     }
@@ -179,7 +179,9 @@ class Multiplayer extends React.Component<Props, State> {
       return
     }
 
-    this.socket = io("http://localhost:8000")
+    this.socket = io({
+      path: "/socketConnectionNamespace"
+    })
 
     this.socket.on('connect', () => {
 
@@ -561,7 +563,7 @@ class Multiplayer extends React.Component<Props, State> {
       case "connecting":
           return (
             <cs.FlexColumnDiv Hcenter>
-              <loaders.BarsLoader width="100" height="100"/>
+              <BarsLoader width="100" height="100" fill="pink"/>
               <cs.ColoredText bold>Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText> </cs.ColoredText>
             </cs.FlexColumnDiv>
           )

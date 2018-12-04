@@ -2,7 +2,7 @@ import React from 'react'
 import * as cs from '../../common'
 import * as s from './style'
 import { AvailablePlayer } from '../Multiplayer';
-import * as loaders from '../../Loaders/Loaders'
+import {ReactComponent as ThreeBallsLoader} from '../../../assets/ThreeBallsLoader.svg'
 
 interface Props {
   availablePlayers: Array<AvailablePlayer>
@@ -31,7 +31,7 @@ const AvailablePlayers = ({availablePlayers, handleAvailablePlayerClick, selecte
           }</s.AvailablePlayersContainer>
         </cs.FlexRowDiv>
         :
-        <loaders.ThreeBallsLoader width="100" height="100"/>
+        <ThreeBallsLoader width="100" height="100"/>
       }
       <cs.ColoredText>
         {selectedAvailablePlayer ? null : availablePlayers.length ? "Select a player to play with!!!" : "There are no free players right now, please wait for some time..."}
