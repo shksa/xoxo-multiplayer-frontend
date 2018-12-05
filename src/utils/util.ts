@@ -1,4 +1,4 @@
-export const StandardHTMLColorNames = [
+const StandardHTMLColorNames = [
   "AliceBlue",
   "AntiqueWhite",
   "Aqua",
@@ -146,3 +146,24 @@ export const StandardHTMLColorNames = [
   "Yellow",
   "YellowGreen"
   ]
+
+const colorNameGenerator = (function* () {
+  let i = 0
+  while (i < StandardHTMLColorNames.length){
+    yield StandardHTMLColorNames[i]
+    i += 1
+    if (i === StandardHTMLColorNames.length) {
+      i = 0
+    }
+  }
+})()
+
+const setColor = (elementRef: React.RefObject<any>) => () => {
+  if (elementRef.current) {
+    elementRef.current.style.backgroundColor = colorNameGenerator.next().value
+  }
+}
+
+export const ChangeColors = 
+  (timeInMs: number, ...elementRefs: Array<React.RefObject<any>>) => 
+    elementRefs.map(elementRef => setInterval(setColor(elementRef), timeInMs))

@@ -8,7 +8,7 @@ export const Cell = styled<{ isInWinningPosition: boolean }, "button">("button")
   height: 100px;
   border: 2px solid black;
   outline: none;
-  font-size: 45px;
+  font-size: 3em;
   ${LevitateTextAnimation};
   ${({isInWinningPosition}) => isInWinningPosition && css`
     background-color: red;

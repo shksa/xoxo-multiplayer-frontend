@@ -17,7 +17,6 @@ export const AvailablePlayer = styled(cs.BasicButton).attrs({
   ${({isSelected}) => isSelected === null ? `` : isSelected === true ? `
     box-shadow: 8px 10px 20px gray;
     font-size: 1.5em;
-    // padding: 20px;
   `
   : `
     box-shadow: 3px 4px 7px gray;

@@ -3,7 +3,7 @@ import * as cs from '../common'
 
 export const MultiPlayer = styled(cs.FlexColumnDiv).attrs({
   Hcenter: true
-})<{showJoiningForm: boolean, colorName: string}>`
+})<{showJoiningForm: boolean}>`
   height: 100%;
   width: 100%;
   ${cs.EverChanging("background-color")};

@@ -100,26 +100,24 @@ export const BasicInputField = styled<{transitionProp?:string, levitate?: boolea
   ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
 `;
 
-export const FlexColumnDiv = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div">("div")`
+const FlexDiv = styled<{transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
   display: flex;
-  flex-direction: column;
-  ${({Hcenter}) => Hcenter && css`
-    align-items: center;
-  `};
-  ${({Vcenter}) => Vcenter && css`
-    justify-content: center;
-  `};
+  ${({height}) => height && `height: ${height}`};
+  ${({width}) => width && `width: ${width}`};
+  ${({cssStyle}) => cssStyle && `${cssStyle}`};
+  ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
 `
 
-export const FlexRowDiv = styled<{Hcenter?: boolean, Vcenter?: boolean}, "div">("div")`
-  display: flex;
+export const FlexColumnDiv = styled(FlexDiv)<{Hcenter?: boolean, Vcenter?: boolean}>`
+  flex-direction: column;
+  ${({Hcenter}) => Hcenter && `align-items: center`};
+  ${({Vcenter}) => Vcenter && `justify-content: center`};
+`
+
+export const FlexRowDiv = styled(FlexDiv)<{Hcenter?: boolean, Vcenter?: boolean}>`
   flex-direction: row;
-  ${({Hcenter}) => Hcenter && css`
-    justify-content: center;
-  `};
-  ${({Vcenter}) => Vcenter && css`
-    align-items: center;
-  `};
+  ${({Hcenter}) => Hcenter && css`justify-content: center`};
+  ${({Vcenter}) => Vcenter && css`align-items: center`};
 `
 
 export const FlexColumnContainer = styled(FlexColumnDiv)`
@@ -138,7 +136,12 @@ export const FlexRowContainer = styled(FlexRowDiv)`
 export const CenteringDiv = styled(FlexColumnDiv).attrs({
   Hcenter: true,
   Vcenter: true,
-})``
+})<{fitContainer?: boolean}>`
+  ${({fitContainer}) => fitContainer && `
+  width: 100%;
+  height: 100%;
+  `}
+`
 
 export const ColoredText = styled<{block?: boolean, color?: string, bold?: boolean, margin?: string}, "span">("span")`
   display: ${({block}) => block ? "block" : "inline"};

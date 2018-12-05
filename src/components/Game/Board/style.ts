@@ -5,7 +5,9 @@ export const Board = styled.div`
   position: relative;
 `;
 
-export const WaitingOverlay = styled(cs.CenteringDiv)<{waitForOpponentMove: boolean}>`
+export const WaitingOverlay = styled(cs.CenteringDiv).attrs({
+  fitContainer: true
+})<{waitForOpponentMove: boolean}>`
   display: none;
   ${({waitForOpponentMove}) => waitForOpponentMove && `
   display: flex;
@@ -13,8 +15,6 @@ export const WaitingOverlay = styled(cs.CenteringDiv)<{waitForOpponentMove: bool
   position: absolute;
   top: 0px;
   left: 0px;
-  height: 100%;
-  width: 100%;
   `};
 `
 

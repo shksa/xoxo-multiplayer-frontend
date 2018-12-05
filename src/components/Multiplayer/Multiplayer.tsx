@@ -77,21 +77,19 @@ interface State {
   availablePlayers: AvailablePlayers
   requestsFromPlayers: RequestsFromPlayers
   isInAvailablePlayersRoom: boolean
-  colorName: string
 }
 
 interface Props {
-  showErrorPopup: (errorObj: Error) => void
+  handleError: (errorObj: Error) => void
 }
 
 
 class Multiplayer extends React.Component<Props, State> {
 
-  colorNameGenerator: Generator
-  buttonRef: React.RefObject<any>
-  nameInputChild: React.RefObject<any>
-  multiPlayerChild: React.RefObject<any>
-  gameComponentChild: React.RefObject<Game>
+  basicButtonRef = React.createRef<any>()
+  nameInputRef = React.createRef<any>()
+  multiPlayerRef = React.createRef<any>()
+  gameComponentChild = React.createRef<Game>()
   defaultPlaceholder = "Enter player name"
   onErrorPlaceholder = "Name cannot be empty"
   opponentName =  ""
@@ -102,19 +100,15 @@ class Multiplayer extends React.Component<Props, State> {
   webRTCConfig: RTCConfiguration
   dataChannel: RTCDataChannel | null = null
   selectedAvailablePlayer: AvailablePlayer | null = null
-  socketServerAddress: string 
+  socketServerAddress: string
+  setIntervalIds: Array<NodeJS.Timeout> 
 
   constructor(props: Props) {
     super(props)
     this.state = {
       playerName: "", currentOutgoingTextMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allTextMessages: [],
-      availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false, colorName: "white"
+      availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false
     }
-    this.gameComponentChild = React.createRef<Game>()
-    this.multiPlayerChild = React.createRef<any>()
-    this.nameInputChild = React.createRef<any>()
-    this.buttonRef = React.createRef<any>()
-    this.colorNameGenerator = this.getColorNameGenerator()
 
     if (process.env.NODE_ENV === "development") {
       this.socketServerAddress = process.env.REACT_APP_DEV_SOCKET_SERVER_ADDRESS as string
@@ -122,23 +116,6 @@ class Multiplayer extends React.Component<Props, State> {
       this.socketServerAddress = process.env.REACT_APP_PROD_SOCKET_SERVER_ADDRESS as string
     }
     console.log("Using socketServerAddress: ", this.socketServerAddress)
-  }
-
-  *getColorNameGenerator() {
-    let i = 0
-    while (i < utils.StandardHTMLColorNames.length){
-      yield utils.StandardHTMLColorNames[i]
-      i += 1
-      if (i === utils.StandardHTMLColorNames.length) {
-        i = 0
-      }
-    }
-  }
-
-  setNewColor = () => {
-    this.multiPlayerChild.current ? this.multiPlayerChild.current.style.backgroundColor = this.colorNameGenerator.next().value : ""
-    this.nameInputChild.current ? this.nameInputChild.current.style.backgroundColor = this.colorNameGenerator.next().value : ""
-    this.buttonRef.current ? this.buttonRef.current.style.backgroundColor = this.colorNameGenerator.next().value : ""
   }
 
   handleInputChange : React.ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -202,7 +179,7 @@ class Multiplayer extends React.Component<Props, State> {
         
         this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
           if (resp.code !== 200) {
-            this.props.showErrorPopup(new Error(resp.message))
+            this.props.handleError(new Error(resp.message))
             return
           }
           console.log(resp)
@@ -302,7 +279,7 @@ class Multiplayer extends React.Component<Props, State> {
           await this.peerConn.setLocalDescription(localSessionDesc) // Set's description of the local end of the connection
           this.sendAnswerToRemotePeerViaSignallingServer(this.peerConn.localDescription as AnswerSignal)
         } catch(err) {
-          this.props.showErrorPopup(err)
+          this.props.handleError(err)
         }
         break;
     
@@ -312,7 +289,7 @@ class Multiplayer extends React.Component<Props, State> {
           const calleeSessionDescription = new RTCSessionDescription(signal)
           await this.peerConn.setRemoteDescription(calleeSessionDescription);
         } catch(err) {
-          this.props.showErrorPopup(err)
+          this.props.handleError(err)
         }
         break;
 
@@ -322,12 +299,12 @@ class Multiplayer extends React.Component<Props, State> {
           const iceCandidate = new RTCIceCandidate(signal.candidate)
           await this.peerConn.addIceCandidate(iceCandidate)
         } catch(err) {
-          this.props.showErrorPopup(err)
+          this.props.handleError(err)
         }
         break;
       
       default:
-        this.props.showErrorPopup(new Error("Got unexpected signal from remote peer."))
+        this.props.handleError(new Error("Got unexpected signal from remote peer."))
         break;
     }
   }
@@ -359,7 +336,7 @@ class Multiplayer extends React.Component<Props, State> {
       // We know the description is valid, and has been set, when the promise returned by setLocalDescription() is fulfilled.
       this.sendOfferToRemotePeerViaSignallingServer(this.peerConn.localDescription as RTCSessionDescription)
     } catch(err) {
-      this.props.showErrorPopup(err)
+      this.props.handleError(err)
     }
   }
 
@@ -399,7 +376,7 @@ class Multiplayer extends React.Component<Props, State> {
       this.socket = this.socket as SocketIOClient.Socket
       this.socket.emit("exitFromAvailablePlayersRoom", (resp: SocketResponse) => {
         if (resp.code !== 200) {
-          this.props.showErrorPopup(new Error(resp.message))
+          this.props.handleError(new Error(resp.message))
           return
         }
         console.log(resp)
@@ -422,7 +399,7 @@ class Multiplayer extends React.Component<Props, State> {
       this.socket = this.socket as SocketIOClient.Socket
       this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
         if (resp.code !== 200) {
-          this.props.showErrorPopup(new Error(resp.message))
+          this.props.handleError(new Error(resp.message))
           return
         }
         console.log(resp)
@@ -464,7 +441,7 @@ class Multiplayer extends React.Component<Props, State> {
   sendRejectionResponseToPeers = (peersToReject: Array<string>) => {
     this.socket.emit("sendRejectionResponseToPeers", peersToReject, (resp: SocketResponse) => {
       if (resp.code !== 200) {
-        this.props.showErrorPopup(new Error(resp.message))
+        this.props.handleError(new Error(resp.message))
       }
       console.log(resp.message)
     })
@@ -622,26 +599,36 @@ class Multiplayer extends React.Component<Props, State> {
     )
   }
 
-  componentDidMount = () => {
-    setInterval(this.setNewColor, 1000)
+  componentDidMount() {
+    this.setIntervalIds = utils.ChangeColors(1000, this.multiPlayerRef, this.nameInputRef, this.basicButtonRef)
+  }
+
+  componentWillUnmount() {
+    console.log("clearing the setIntervals ", this.setIntervalIds)
+    this.setIntervalIds.forEach(intervalID => clearInterval(intervalID))
   }
 
   render() {
     console.log("state in render: ", this.state)
-    const {playerName, placeholderForPlayerNameEle, isInAvailablePlayersRoom, colorName}= this.state
+    const {playerName, placeholderForPlayerNameEle, isInAvailablePlayersRoom}= this.state
     const showJoiningForm = isInAvailablePlayersRoom === false && this.dataChannel === null ? true : false
     console.log("showJoiningForm: ", showJoiningForm)
     return (
-      <s.MultiPlayer showJoiningForm colorName={colorName} ref={this.multiPlayerChild}>
+      <s.MultiPlayer showJoiningForm ref={this.multiPlayerRef}>
         {
         showJoiningForm
         ?
         <s.JoiningForm>
           <s.NameInput 
-            ref={this.nameInputChild} name="playerName" autoFocus placeholder={placeholderForPlayerNameEle} 
+            ref={this.nameInputRef} name="playerName" autoFocus placeholder={placeholderForPlayerNameEle} 
             onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} 
           />
-          <cs.BasicButton transitionProp="background-color" ref={this.buttonRef} levitate onClick={this.handleJoinRoomClick}>Join room</cs.BasicButton>
+          <cs.BasicButton 
+            transitionProp="background-color" ref={this.basicButtonRef} 
+            levitate onClick={this.handleJoinRoomClick}
+          >
+          Join room
+          </cs.BasicButton>
         </s.JoiningForm>
         :
         <s.MultiPlayerWrapper>

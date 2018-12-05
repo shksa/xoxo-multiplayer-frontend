@@ -3,7 +3,8 @@ import * as s from './AppStyle'
 import Multiplayer from './components/Multiplayer/Multiplayer';
 import StartScreen from './components/StartScreen/StartScreen';
 import Game from './components/Game/Game';
-import { ThemeProvider } from "./styled-components";
+import { ThemeProvider, css } from "./styled-components";
+import * as cs from './components/common'
 
 // GameMode is a union of SinglePlayer and MultiPlayer type
 export enum GameMode {
@@ -23,7 +24,7 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  showErrorPopup = (errorObj: Error) => this.setState({errorObj})
+  handleError = (errorObj: Error) => this.setState({errorObj})
 
   closeErrorPopup = () => this.setState({errorObj: null})
 
@@ -38,7 +39,7 @@ class App extends React.Component<{}, State> {
 
       case GameMode.MultiPlayer:
         return (
-          <Multiplayer showErrorPopup={this.showErrorPopup}  />
+          <Multiplayer handleError={this.handleError}  />
         )
 
       case null:
@@ -51,6 +52,18 @@ class App extends React.Component<{}, State> {
     }
   }
 
+  showErrorPopup = () => {
+    const {errorObj} = this.state
+    return (
+      <s.ErrorPopUpContainer>
+        <s.ErrorPopUp>
+          <s.CloseButton onClick={this.closeErrorPopup}>X</s.CloseButton>
+          {errorObj!.message}
+        </s.ErrorPopUp>
+      </s.ErrorPopUpContainer>
+    )
+  }
+
   render() {
     const {errorObj, gameMode} = this.state
     return (
@@ -58,15 +71,7 @@ class App extends React.Component<{}, State> {
         <React.Fragment>
           <s.GlobalStyle />
           <s.AppWrapper>
-            {errorObj 
-              && 
-              <s.GreyScreen>
-                <s.ErrorPopUp>
-                  <s.CloseButton onClick={this.closeErrorPopup}>X</s.CloseButton>
-                  {errorObj.message}
-                </s.ErrorPopUp>
-              </s.GreyScreen>
-            }
+            {errorObj && this.showErrorPopup()}
             {this.showViewBasedOnGameMode(gameMode)}
           </s.AppWrapper>
         </React.Fragment>
