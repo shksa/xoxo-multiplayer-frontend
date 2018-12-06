@@ -60,7 +60,6 @@ interface State {
   moveInHistory: number | null
   history: GameHistory
   gameResult: GameResult
-  isGameEnded: boolean
   gameMode: GameMode
 }
 
@@ -70,6 +69,7 @@ interface Props {
   selfName: string
   opponentName: string
   sendPlayerMoveCellIDToOpponent?: (cellID: number) => void
+  sendRestartSignalToOpponent?: () => void
   theme: ThemeInterface
 }
 
@@ -98,7 +98,6 @@ class Game extends React.Component<Props, State> {
       moveInHistory: null,
       history: new Map(),
       gameResult,
-      isGameEnded: false
     }
     this.colorForSelf = props.isSelfPlayer1 ? props.theme.playerOneColor : props.theme.playerTwoColor
     this.colorForOpponent =  this.colorForSelf === props.theme.playerOneColor ? props.theme.playerTwoColor : props.theme.playerOneColor
@@ -159,11 +158,9 @@ class Game extends React.Component<Props, State> {
 
     const result = this.checkForWinDrawNeither(newBoardState, currentPlayer)
 
-    const isGameEnded = result.resultType === "neither" ? false : true
-
     const nextPlayer = this.togglePlayer(currentPlayer)
 
-    this.setState({boardState: newBoardState, nextPlayer, gameResult: result, isGameEnded})
+    this.setState({boardState: newBoardState, nextPlayer, gameResult: result})
 
     this.recordMoveInHistory(newBoardState, nextPlayer)
   }
@@ -206,7 +203,7 @@ class Game extends React.Component<Props, State> {
     return gameIsADraw
   }
 
-  goBackToMove = (moveNum: number) => {
+  goBackToMove = (moveNum: number, playBySelf: boolean) => {
     if (moveNum !== 0) {
       const prevGameState = this.state.history.get(moveNum) as GameState
       const {boardState, nextPlayer} = prevGameState
@@ -219,8 +216,11 @@ class Game extends React.Component<Props, State> {
       const gameResult: NeitherResult = {resultType: "neither"}
       this.setState({
         boardState: Array(9).fill(null), history: new Map(), moveInHistory: null, 
-        nextPlayer: PlayerType.Player1, gameResult, isGameEnded: false
+        nextPlayer: PlayerType.Player1, gameResult
       })
+      if (playBySelf && this.state.gameMode === GameMode.MultiPlayer) {
+        this.props.sendRestartSignalToOpponent!()
+      }
     }
   }
 
@@ -280,7 +280,7 @@ class Game extends React.Component<Props, State> {
         </cs.FlexColumnDiv>
         <s.History>
           <s.Move>
-            <cs.BasicButton levitate onClick={() => this.goBackToMove(0)}>
+            <cs.BasicButton levitate onClick={() => this.goBackToMove(0, true)}>
               Go to Game start
             </cs.BasicButton>
           </s.Move>
@@ -289,7 +289,7 @@ class Game extends React.Component<Props, State> {
             <s.Move key={moveNum}>
               <cs.BasicButton 
                 levitate isClicked={moveInHistory===moveNum} 
-                onClick={() => this.goBackToMove(moveNum)}
+                onClick={() => this.goBackToMove(moveNum, true)}
               >
               Go to move #{moveNum}
               </cs.BasicButton>

@@ -58,8 +58,12 @@ export interface PlayerMoveCellID {
   value: number
 }
 
+export interface RestartSignal {
+  type: "RestartGame"
+}
+
 // Payload is the type of an object which is sent over the WebRTC connection. The object can be of type TextMessage or PlayerMoveSymbol
-export type Payload = TextMessage | PlayerMoveCellID
+export type Payload = TextMessage | PlayerMoveCellID | RestartSignal
 
 type SendQueue = Array<Payload>
 
@@ -412,18 +416,29 @@ class Multiplayer extends React.Component<Props, State> {
     channel.onmessage = (evt: MessageEvent) => {
       console.log("Got payload from data channel!!!")
       const payload: Payload = JSON.parse(evt.data)
-      if (payload.type === "PlayerMoveCellID") {
-        console.log("got PlayerMoveCellID: ", payload.value)
-        // make handlePlayerMove execute in Game component which is a child of this component.
-        // so make a method in child comp execute from the parent comp.
-        // Using a reference to the child comp and trigerring the method.
-        this.gameComponentChild.current!.handlePlayerMove(payload.value, false)
-        return
+      switch (payload.type) {
+        case "PlayerMoveCellID":
+          console.log("got PlayerMoveCellID: ", payload.value)
+          // make handlePlayerMove execute in Game component which is a child of this component.
+          // so make a method in child comp execute from the parent comp.
+          // Using a reference to the child comp and trigerring the method.
+          this.gameComponentChild.current!.handlePlayerMove(payload.value, false)
+          break;
+
+        case "RestartGame":
+          console.log("Got restart game signal: ", payload)
+          this.gameComponentChild.current!.goBackToMove(0, false)
+          break;
+
+        case TextMessageTypes.IncomingTextMessage:
+          this.setState((prevState) => ({
+            allTextMessages: prevState.allTextMessages.concat(payload)
+          }))
+          break;
+      
+        default:
+          break;
       }
-      const incomingTextMessage: IncomingTextMessage = {type: TextMessageTypes.IncomingTextMessage, value: payload.value}
-      this.setState((prevState) => ({
-        allTextMessages: prevState.allTextMessages.concat(incomingTextMessage)
-      }))
     }
   }
 
@@ -494,6 +509,11 @@ class Multiplayer extends React.Component<Props, State> {
     this.sendDataToRemotePeer(playerMoveCellID)
   }
 
+  sendRestartSignalToOpponent = () => {
+    const restartSignal: RestartSignal = {type: "RestartGame"}
+    this.sendDataToRemotePeer(restartSignal)
+  }
+
   handleQuitMatchAndGoBackToAvailablePool = () => {
     this.dataChannel!.close()
   }
@@ -537,6 +557,7 @@ class Multiplayer extends React.Component<Props, State> {
           gameMode={GameMode.MultiPlayer}
           ref={this.gameComponentChild}
           sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
+          sendRestartSignalToOpponent={this.sendRestartSignalToOpponent}
           selfName={this.state.selfName}
           opponentName={this.selectedAvailablePlayer!.name}
           isSelfPlayer1={this.isInitiator}
