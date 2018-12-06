@@ -12,31 +12,34 @@ interface Props {
 
 const AvailablePlayers = ({availablePlayers, handleAvailablePlayerClick, selectedAvailablePlayer}: Props) => {
   return (
-    <cs.FlexColumnDiv Hcenter>
+    <React.Fragment>
       {
-        availablePlayers.length ? 
-        <cs.FlexRowDiv Vcenter>
-          <cs.ColoredText bold>Available players:</cs.ColoredText>
-          <s.AvailablePlayersContainer>{
-            availablePlayers.map(player => 
-              <s.AvailablePlayer 
-                onClick={() => handleAvailablePlayerClick(player)} 
-                key={player.socketID}
-                isSelected={selectedAvailablePlayer && selectedAvailablePlayer.socketID === player.socketID}
-                disabled={selectedAvailablePlayer ? selectedAvailablePlayer.socketID !== player.socketID : false}
-              >
-              {player.name}
-              </s.AvailablePlayer>
-            )
-          }</s.AvailablePlayersContainer>
-        </cs.FlexRowDiv>
+        availablePlayers.length ?
+        <cs.FlexColumnDiv Hcenter>
+          <cs.FlexRowDiv Vcenter cssStyle="margin-left: 10px; margin-right: 10px;">
+            <cs.ColoredText bold>Available players:</cs.ColoredText>
+            <s.AvailablePlayersContainer>{
+              availablePlayers.map(player => 
+                <s.AvailablePlayer 
+                  onClick={() => handleAvailablePlayerClick(player)} 
+                  key={player.socketID}
+                  isSelected={selectedAvailablePlayer && selectedAvailablePlayer.socketID === player.socketID}
+                  disabled={selectedAvailablePlayer ? selectedAvailablePlayer.socketID !== player.socketID : false}
+                >
+                {player.name}
+                </s.AvailablePlayer>
+              )
+            }</s.AvailablePlayersContainer>
+          </cs.FlexRowDiv>
+          <cs.ColoredText bold block>Select a player to play with!!!</cs.ColoredText>
+        </cs.FlexColumnDiv> 
         :
-        <ThreeBallsLoader width="100" height="100"/>
+        <cs.FlexColumnDiv Hcenter>
+          <ThreeBallsLoader width="100" height="100"/>
+          <cs.ColoredText bold block>There are no free players right now, please wait for some time...</cs.ColoredText>
+        </cs.FlexColumnDiv>
       }
-      <cs.ColoredText>
-        {selectedAvailablePlayer ? null : availablePlayers.length ? "Select a player to play with!!!" : "There are no free players right now, please wait for some time..."}
-      </cs.ColoredText>
-    </cs.FlexColumnDiv>
+    </React.Fragment>
   )
 }
 

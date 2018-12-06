@@ -70,7 +70,7 @@ type RequestsFromPlayers = Map<string, PeerSignal>
 type AvailablePlayers = Array<AvailablePlayer>
 
 interface State {
-  playerName: string
+  selfName: string
   currentOutgoingTextMessage: string
   placeholderForPlayerNameEle: string
   allTextMessages: AllTextMessages
@@ -106,7 +106,7 @@ class Multiplayer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {
-      playerName: "", currentOutgoingTextMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allTextMessages: [],
+      selfName: "", currentOutgoingTextMessage: "", placeholderForPlayerNameEle: this.defaultPlaceholder, allTextMessages: [],
       availablePlayers: [], requestsFromPlayers: new Map(), isInAvailablePlayersRoom: false
     }
 
@@ -122,7 +122,7 @@ class Multiplayer extends React.Component<Props, State> {
     const {name, value} = event.currentTarget
     switch (name) {
       case "playerName":
-        this.setState({playerName: value})
+        this.setState({selfName: value})
         break
     
       case "currentOutgoingMessage":
@@ -159,7 +159,7 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   handleJoinRoomClick = () => {
-    if (this.state.playerName === "") {
+    if (this.state.selfName === "") {
       this.setState({placeholderForPlayerNameEle: this.onErrorPlaceholder})
       return
     }
@@ -174,7 +174,7 @@ class Multiplayer extends React.Component<Props, State> {
       
       this.registerToSocketEvents()
       
-      this.socket.emit("registerNameWithSocket", this.state.playerName, (response: SocketResponse) => {
+      this.socket.emit("registerNameWithSocket", this.state.selfName, (response: SocketResponse) => {
         console.log(response)
         
         this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
@@ -253,17 +253,17 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   sendOfferToRemotePeerViaSignallingServer = (offer: OfferSignal) => {
-    console.log(`${this.state.playerName} sending an offer to remote player ${this.selectedAvailablePlayer!.name}: ${offer}`);
+    console.log(`${this.state.selfName} sending an offer to remote player ${this.selectedAvailablePlayer!.name}: ${offer}`);
     this.socket.emit('signalOfferToRemotePlayer', offer, this.selectedAvailablePlayer!.socketID);
   }
 
   sendCandidateToRemotePeerViaSignallingServer = (candidate: CandidateSignal) => {
-    console.log(`${this.state.playerName} sending a candidate message to remote player ${this.selectedAvailablePlayer!.name}: ${candidate}`);
+    console.log(`${this.state.selfName} sending a candidate message to remote player ${this.selectedAvailablePlayer!.name}: ${candidate}`);
     this.socket.emit('signalCandidateToRemotePlayer', candidate, this.selectedAvailablePlayer!.socketID);
   }
 
   sendAnswerToRemotePeerViaSignallingServer = (answer: AnswerSignal) => {
-    console.log(`${this.state.playerName} sending a answer to remote player ${this.selectedAvailablePlayer!.name}: ${answer}`);
+    console.log(`${this.state.selfName} sending a answer to remote player ${this.selectedAvailablePlayer!.name}: ${answer}`);
     this.socket.emit('signalAnswerToRemotePlayer', answer, this.selectedAvailablePlayer!.socketID);
   }
 
@@ -499,7 +499,7 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   showViewBasedOnDataChannelState = () => {
-    const {playerName, allTextMessages, currentOutgoingTextMessage} = this.state
+    const {selfName, allTextMessages, currentOutgoingTextMessage} = this.state
     if (this.dataChannel === null) {
       return
     }
@@ -520,28 +520,27 @@ class Multiplayer extends React.Component<Props, State> {
     
       case "open":
         return (
-          <s.GameContainer>
+          <React.Fragment>
             <Game
               gameMode={GameMode.MultiPlayer}
               ref={this.gameComponentChild}
               sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
-              playerName={playerName}
+              selfName={selfName}
               opponentName={this.selectedAvailablePlayer!.name}
-              player1Name={this.isInitiator ? playerName : this.selectedAvailablePlayer!.name} 
-              player2Name={this.isInitiator ? this.selectedAvailablePlayer!.name : playerName} 
+              isSelfPlayer1={this.isInitiator}
             />
             <cs.FlexRowContainer>
               <cs.ColoredText>Quit match and join the available pool again?</cs.ColoredText>
               <cs.BasicButton onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
             </cs.FlexRowContainer>
-            <Chatbox
+            {/* <Chatbox
               allTextMessages={allTextMessages} 
               handleEnter={this.handleEnter}
               handleSendTextMessageButton={this.handleSendTextMessageButton}
               currentOutgoingMessage={currentOutgoingTextMessage}
               handleInputChange={this.handleInputChange}
-            />
-          </s.GameContainer>
+            /> */}
+          </React.Fragment>
         )
 
       case "connecting":
@@ -598,29 +597,29 @@ class Multiplayer extends React.Component<Props, State> {
     )
   }
 
-  componentDidMount() {
-    this.setIntervalIds = utils.ChangeColors(1000, this.multiPlayerRef, this.nameInputRef, this.basicButtonRef)
-  }
+  // componentDidMount() {
+  //   this.setIntervalIds = utils.ChangeColors(1000, this.multiPlayerRef, this.nameInputRef, this.basicButtonRef)
+  // }
 
-  componentWillUnmount() {
-    console.log("clearing the setIntervals ", this.setIntervalIds)
-    this.setIntervalIds.forEach(intervalID => clearInterval(intervalID))
-  }
+  // componentWillUnmount() {
+  //   console.log("clearing the setIntervals ", this.setIntervalIds)
+  //   this.setIntervalIds.forEach(intervalID => clearInterval(intervalID))
+  // }
 
   render() {
     console.log("state in render: ", this.state)
-    const {playerName, placeholderForPlayerNameEle, isInAvailablePlayersRoom}= this.state
+    const {selfName, placeholderForPlayerNameEle, isInAvailablePlayersRoom}= this.state
     const showJoiningForm = isInAvailablePlayersRoom === false && this.dataChannel === null ? true : false
     console.log("showJoiningForm: ", showJoiningForm)
     return (
-      <s.MultiPlayer showJoiningForm ref={this.multiPlayerRef}>
+      <s.MultiPlayer ref={this.multiPlayerRef}>
         {
         showJoiningForm
         ?
         <s.JoiningForm>
           <s.NameInput 
             ref={this.nameInputRef} name="playerName" autoFocus placeholder={placeholderForPlayerNameEle} 
-            onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={playerName} 
+            onKeyUp={this.handleEnter} onChange={this.handleInputChange} value={selfName} 
           />
           <cs.BasicButton 
             transitionProp="background-color" ref={this.basicButtonRef} 
@@ -631,11 +630,15 @@ class Multiplayer extends React.Component<Props, State> {
         </s.JoiningForm>
         :
         <s.MultiPlayerWrapper>
-          <cs.ColoredText block bold>You are playing as <cs.ColoredText bold color="red">{playerName}</cs.ColoredText></cs.ColoredText>
-          <cs.FlexRowDiv>
-            {this.showAvailablePlayers()}
+          <s.AvailablePlayersAndRequestsContainer>
+            <cs.FlexColumnDiv Hcenter>
+              <cs.ColoredText block bold>
+                You are playing as <cs.ColoredText bold color="red">{selfName}</cs.ColoredText>
+              </cs.ColoredText>
+              {this.showAvailablePlayers()}
+            </cs.FlexColumnDiv>
             {this.showRequestsFromPlayers()}
-          </cs.FlexRowDiv>
+          </s.AvailablePlayersAndRequestsContainer>
           {this.showViewBasedOnDataChannelState()}
         </s.MultiPlayerWrapper>
         }

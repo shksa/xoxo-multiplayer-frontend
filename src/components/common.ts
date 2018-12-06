@@ -100,11 +100,15 @@ export const BasicInputField = styled<{transitionProp?:string, levitate?: boolea
   ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
 `;
 
-const FlexDiv = styled<{transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
+const FlexDiv = styled<{fitContainer?: boolean, transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
   display: flex;
   ${({height}) => height && `height: ${height}`};
   ${({width}) => width && `width: ${width}`};
   ${({cssStyle}) => cssStyle && `${cssStyle}`};
+  ${({fitContainer}) => fitContainer && `
+  width: 100%;
+  height: 100%;
+  `};
   ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
 `
 
@@ -136,11 +140,7 @@ export const FlexRowContainer = styled(FlexRowDiv)`
 export const CenteringDiv = styled(FlexColumnDiv).attrs({
   Hcenter: true,
   Vcenter: true,
-})<{fitContainer?: boolean}>`
-  ${({fitContainer}) => fitContainer && `
-  width: 100%;
-  height: 100%;
-  `}
+})`
 `
 
 export const ColoredText = styled<{block?: boolean, color?: string, bold?: boolean, margin?: string}, "span">("span")`

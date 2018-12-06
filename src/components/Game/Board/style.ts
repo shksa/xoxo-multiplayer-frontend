@@ -5,7 +5,7 @@ export const Board = styled.div`
   position: relative;
 `;
 
-export const WaitingOverlay = styled(cs.CenteringDiv).attrs({
+export const Overlay = styled(cs.CenteringDiv).attrs({
   fitContainer: true
 })<{waitForOpponentMove: boolean}>`
   display: none;
