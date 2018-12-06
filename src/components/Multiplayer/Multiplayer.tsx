@@ -80,7 +80,7 @@ interface State {
 }
 
 interface Props {
-  handleError: (errorObj: Error) => void
+  showPopUp: (errorObj: Error) => void
 }
 
 
@@ -179,7 +179,7 @@ class Multiplayer extends React.Component<Props, State> {
         
         this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
           if (resp.code !== 200) {
-            this.props.handleError(new Error(resp.message))
+            this.props.showPopUp(new Error(resp.message))
             return
           }
           console.log(resp)
@@ -218,32 +218,32 @@ class Multiplayer extends React.Component<Props, State> {
     
     this.socket.on('log', (msg: object) => console.log(msg))
     
-    this.socket.on('offerFromRemotePlayer', (offer: object, remotePlayerName: string, remotePlayerSocketID: string) => {
-      console.log(`${remotePlayerName} has sent a offer ${offer}`)
-      const peerSignal: PeerSignal = {name: remotePlayerName, socketID: remotePlayerSocketID, offer: offer as OfferSignal, candidate: null}
+    this.socket.on('offerFromRemotePlayer', (offer: OfferSignal, remotePlayerName: string, remotePlayerSocketID: string) => {
+      console.log(`${remotePlayerName} has sent a offer ${JSON.stringify(offer)}`)
+      const peerSignal: PeerSignal = {name: remotePlayerName, socketID: remotePlayerSocketID, offer: offer, candidate: null}
       this.setState((prevState) => ({
         requestsFromPlayers: new Map(prevState.requestsFromPlayers).set(remotePlayerSocketID, peerSignal)
       }))
     });
 
-    this.socket.on('candidateFromRemotePlayer', (candidate: object, remotePlayerName: string, remotePlayerSocketID: string) => {
-      console.log(`${remotePlayerName} (${remotePlayerSocketID}) has sent an ICE candidate ${candidate}`)
+    this.socket.on('candidateFromRemotePlayer', (candidate: CandidateSignal, remotePlayerName: string, remotePlayerSocketID: string) => {
+      console.log(`${remotePlayerName} (${remotePlayerSocketID}) has sent an ICE candidate ${JSON.stringify(candidate)}`)
       if (this.isInitiator) {
-        this.processSignalFromRemotePeer(candidate as CandidateSignal)
+        this.processSignalFromRemotePeer(candidate)
         return
       }
       this.setState((prevState) => {
         const requestsFromPlayers = new Map(prevState.requestsFromPlayers)
         const signal = requestsFromPlayers.get(remotePlayerSocketID) as PeerSignal
-        signal.candidate = candidate as CandidateSignal
+        signal.candidate = candidate
         requestsFromPlayers.set(remotePlayerSocketID, signal)
         return {requestsFromPlayers}
       })
     });
 
-    this.socket.on('answerFromRemotePlayer', (answer: object, remotePlayerName: string, remotePlayerSocketID: string) => {
-      console.log(`${remotePlayerName} (${remotePlayerSocketID}) has sent an answer ${answer}`)
-      this.processSignalFromRemotePeer(answer as RTCSessionDescription)
+    this.socket.on('answerFromRemotePlayer', (answer: AnswerSignal, remotePlayerName: string, remotePlayerSocketID: string) => {
+      console.log(`${remotePlayerName} (${remotePlayerSocketID}) has sent an answer ${JSON.stringify(answer)}`)
+      this.processSignalFromRemotePeer(answer)
     });
 
     this.socket.on('disconnect', (reason: string) => {
@@ -279,7 +279,7 @@ class Multiplayer extends React.Component<Props, State> {
           await this.peerConn.setLocalDescription(localSessionDesc) // Set's description of the local end of the connection
           this.sendAnswerToRemotePeerViaSignallingServer(this.peerConn.localDescription as AnswerSignal)
         } catch(err) {
-          this.props.handleError(err)
+          this.props.showPopUp(err)
         }
         break;
     
@@ -289,7 +289,7 @@ class Multiplayer extends React.Component<Props, State> {
           const calleeSessionDescription = new RTCSessionDescription(signal)
           await this.peerConn.setRemoteDescription(calleeSessionDescription);
         } catch(err) {
-          this.props.handleError(err)
+          this.props.showPopUp(err)
         }
         break;
 
@@ -299,12 +299,12 @@ class Multiplayer extends React.Component<Props, State> {
           const iceCandidate = new RTCIceCandidate(signal.candidate)
           await this.peerConn.addIceCandidate(iceCandidate)
         } catch(err) {
-          this.props.handleError(err)
+          this.props.showPopUp(err)
         }
         break;
       
       default:
-        this.props.handleError(new Error("Got unexpected signal from remote peer."))
+        this.props.showPopUp(new Error("Got unexpected signal from remote peer."))
         break;
     }
   }
@@ -336,7 +336,7 @@ class Multiplayer extends React.Component<Props, State> {
       // We know the description is valid, and has been set, when the promise returned by setLocalDescription() is fulfilled.
       this.sendOfferToRemotePeerViaSignallingServer(this.peerConn.localDescription as RTCSessionDescription)
     } catch(err) {
-      this.props.handleError(err)
+      this.props.showPopUp(err)
     }
   }
 
@@ -376,7 +376,7 @@ class Multiplayer extends React.Component<Props, State> {
       this.socket = this.socket as SocketIOClient.Socket
       this.socket.emit("exitFromAvailablePlayersRoom", (resp: SocketResponse) => {
         if (resp.code !== 200) {
-          this.props.handleError(new Error(resp.message))
+          this.props.showPopUp(new Error(resp.message))
           return
         }
         console.log(resp)
@@ -399,7 +399,7 @@ class Multiplayer extends React.Component<Props, State> {
       this.socket = this.socket as SocketIOClient.Socket
       this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
         if (resp.code !== 200) {
-          this.props.handleError(new Error(resp.message))
+          this.props.showPopUp(new Error(resp.message))
           return
         }
         console.log(resp)
@@ -441,7 +441,7 @@ class Multiplayer extends React.Component<Props, State> {
   sendRejectionResponseToPeers = (peersToReject: Array<string>) => {
     this.socket.emit("sendRejectionResponseToPeers", peersToReject, (resp: SocketResponse) => {
       if (resp.code !== 200) {
-        this.props.handleError(new Error(resp.message))
+        this.props.showPopUp(new Error(resp.message))
       }
       console.log(resp.message)
     })
@@ -520,8 +520,7 @@ class Multiplayer extends React.Component<Props, State> {
     
       case "open":
         return (
-          <cs.FlexColumnDiv Hcenter>
-            <cs.ColoredText block bold>Connected with <cs.ColoredText color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText></cs.ColoredText>
+          <s.GameContainer>
             <Game
               gameMode={GameMode.MultiPlayer}
               ref={this.gameComponentChild}
@@ -542,7 +541,7 @@ class Multiplayer extends React.Component<Props, State> {
               currentOutgoingMessage={currentOutgoingTextMessage}
               handleInputChange={this.handleInputChange}
             />
-          </cs.FlexColumnDiv>
+          </s.GameContainer>
         )
 
       case "connecting":

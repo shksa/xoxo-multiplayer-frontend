@@ -150,3 +150,25 @@ export const ColoredText = styled<{block?: boolean, color?: string, bold?: boole
   font-size: 1.5em;
   margin: ${({margin}) => margin}
 `
+
+type DeviceType = "desktop" | "tablet" | "phone"
+type Media = {[device in DeviceType]: Function}
+
+const deviceSizes: {[device in DeviceType]: number} = {
+  desktop: 992,
+  tablet: 768,
+  phone: 576,
+}
+
+const devices: Array<DeviceType> = ["desktop", "phone", "tablet"]
+
+// Iterate through the sizes and create a media template
+export const media = devices.reduce((acc, label) => {
+  acc[label] = (templateStrings: TemplateStringsArray) => css`
+    @media (max-width: ${deviceSizes[label] / 16}em) {
+      ${css(templateStrings)}
+    }
+  `
+
+  return acc
+}, {} as Media)

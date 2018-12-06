@@ -9,6 +9,10 @@ export const ChatBox = styled(cs.FlexColumnContainer)`
   bottom: 0px;
   justify-content: space-around;
   background-color: antiquewhite;
+  ${cs.media.phone`
+  width: 100%;
+  height: 20%;
+  `};
 `
 
 export const MessageBox = styled(cs.FlexColumnContainer)`

@@ -12,7 +12,7 @@ export enum GameMode {
   MultiPlayer = "MultiPlayer"
 }
 interface State {
-  errorObj: Error | null,
+  popUpValue: any,
   gameMode: GameMode | null
 }
 
@@ -20,13 +20,13 @@ class App extends React.Component<{}, State> {
   constructor() {
     super({});
     this.state = {
-      errorObj: null, gameMode: null
+      popUpValue: null, gameMode: null
     }
   }
 
-  handleError = (errorObj: Error) => this.setState({errorObj})
+  showPopUp = (popUpValue: any) => this.setState({popUpValue})
 
-  closeErrorPopup = () => this.setState({errorObj: null})
+  closePopUp = () => this.setState({popUpValue: null})
 
   gameModeSelectionButtonHandler = (mode: GameMode) => this.setState({gameMode: mode})
 
@@ -39,7 +39,7 @@ class App extends React.Component<{}, State> {
 
       case GameMode.MultiPlayer:
         return (
-          <Multiplayer handleError={this.handleError}  />
+          <Multiplayer showPopUp={this.showPopUp}  />
         )
 
       case null:
@@ -52,26 +52,26 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  showErrorPopup = () => {
-    const {errorObj} = this.state
+  popUpView = () => {
+    const {popUpValue} = this.state
     return (
-      <s.ErrorPopUpContainer>
-        <s.ErrorPopUp>
-          <s.CloseButton onClick={this.closeErrorPopup}>X</s.CloseButton>
-          {errorObj!.message}
-        </s.ErrorPopUp>
-      </s.ErrorPopUpContainer>
+      <s.PopUpContainer>
+        <s.PopUp>
+          <s.CloseButton onClick={this.closePopUp}>X</s.CloseButton>
+          {popUpValue}
+        </s.PopUp>
+      </s.PopUpContainer>
     )
   }
 
   render() {
-    const {errorObj, gameMode} = this.state
+    const {popUpValue, gameMode} = this.state
     return (
       <ThemeProvider theme={s.Theme}>
         <React.Fragment>
           <s.GlobalStyle />
           <s.AppWrapper>
-            {errorObj && this.showErrorPopup()}
+            {popUpValue && this.popUpView()}
             {this.showViewBasedOnGameMode(gameMode)}
           </s.AppWrapper>
         </React.Fragment>

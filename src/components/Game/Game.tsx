@@ -176,7 +176,6 @@ class Game extends React.Component<Props, State> {
     const {nextPlayer, boardState, history, moveInHistory, winner, Player1, playerName, opponentName} = this.state
     const symbolOfNextPlayer = this.getSymbolOfPlayer(nextPlayer)
     const waitForOpponentMove = winner ? false : this.state[nextPlayer].name !== playerName
-    const isPlayer1 = Player1.name === playerName
     return (
       <s.Game>
         <cs.FlexColumnDiv Hcenter>
@@ -205,17 +204,19 @@ class Game extends React.Component<Props, State> {
           />
         </cs.FlexColumnDiv>
         <s.History>
+          <s.Move><cs.BasicButton levitate onClick={() => this.goBackToMove(0)}>Go to Game start</cs.BasicButton></s.Move>
           {
-          winner ? <cs.ColoredText bold>Game over!</cs.ColoredText> : <cs.ColoredText bold>Next Player: {this.state[nextPlayer].name}, Symbol: {symbolOfNextPlayer}</cs.ColoredText>
+          Array.from(history.keys()).map((moveNum) => (
+            <s.Move key={moveNum}>
+              <cs.BasicButton 
+                levitate isClicked={moveInHistory===moveNum} 
+                onClick={() => this.goBackToMove(moveNum)}
+              >
+              Go to move #{moveNum}
+              </cs.BasicButton>
+            </s.Move>
+          ))
           }
-          <s.ListOfMoves>
-            <s.Move><cs.BasicButton levitate onClick={() => this.goBackToMove(0)}>Go to Game start</cs.BasicButton></s.Move>
-            {
-            Array.from(history.keys()).map((moveNum) => {
-              return <s.Move key={moveNum}><cs.BasicButton levitate  isClicked={moveInHistory===moveNum} onClick={() => this.goBackToMove(moveNum)}>Go to move #{moveNum}</cs.BasicButton></s.Move>
-            })
-            }
-          </s.ListOfMoves>
         </s.History>      
       </s.Game>
     );

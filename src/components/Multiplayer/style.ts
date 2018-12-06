@@ -19,6 +19,12 @@ export const MultiPlayerWrapper = styled(cs.CenteringDiv)`
   width: 100%;
 `
 
+export const GameContainer = styled(cs.FlexColumnDiv).attrs({
+  Hcenter: true
+})`
+  max-width: 100%;
+`
+
 export const JoiningForm = styled(cs.FlexRowDiv)``
 
 export const NameInput = styled(cs.BasicInputField).attrs({

@@ -27,7 +27,7 @@ export const CloseButton = styled(cs.BasicButton)`
   border-radius: 100%;
 `
 
-export const ErrorPopUpContainer = styled(cs.CenteringDiv).attrs({
+export const PopUpContainer = styled(cs.CenteringDiv).attrs({
   fitContainer: true,
 })`
   position: absolute;
@@ -35,7 +35,7 @@ export const ErrorPopUpContainer = styled(cs.CenteringDiv).attrs({
   left: 0px;
 `
 
-export const ErrorPopUp = styled(cs.CenteringDiv)`
+export const PopUp = styled(cs.CenteringDiv)`
   width: 30%;
   height: 30%;
   border-radius: 20px;
