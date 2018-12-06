@@ -619,14 +619,14 @@ class Multiplayer extends React.Component<Props, State> {
     )
   }
 
-  // componentDidMount() {
-  //   this.setIntervalIds = utils.ChangeColors(1000, this.multiPlayerRef, this.nameInputRef, this.basicButtonRef)
-  // }
+  componentDidMount() {
+    this.setIntervalIds = utils.ChangeColors(1000, this.multiPlayerRef, this.nameInputRef, this.basicButtonRef)
+  }
 
-  // componentWillUnmount() {
-  //   console.log("clearing the setIntervals ", this.setIntervalIds)
-  //   this.setIntervalIds.forEach(intervalID => clearInterval(intervalID))
-  // }
+  componentWillUnmount() {
+    console.log("clearing the setIntervals ", this.setIntervalIds)
+    this.setIntervalIds.forEach(intervalID => clearInterval(intervalID))
+  }
 
   render() {
     console.log("state in render: ", this.state)
