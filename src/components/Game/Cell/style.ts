@@ -12,7 +12,7 @@ export const Cell = styled<{ isInWinningPosition: boolean }, "button">("button")
   background-color: white;
   ${LevitateTextAnimation};
   ${({isInWinningPosition}) => isInWinningPosition && css`
-    background-color: red;
+    background-color: green;
     color: white;
   `
   };

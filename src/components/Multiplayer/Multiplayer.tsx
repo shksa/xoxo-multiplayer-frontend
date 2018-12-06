@@ -84,7 +84,7 @@ interface State {
 }
 
 interface Props {
-  showPopUp: (errorObj: Error) => void
+  showPopUp: (popUpValue: any) => void
 }
 
 
@@ -427,6 +427,7 @@ class Multiplayer extends React.Component<Props, State> {
 
         case "RestartGame":
           console.log("Got restart game signal: ", payload)
+          this.props.showPopUp(`Game has been restarted by ${this.selectedAvailablePlayer!.name}`)
           this.gameComponentChild.current!.goBackToMove(0, false)
           break;
 

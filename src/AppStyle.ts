@@ -39,14 +39,20 @@ export const PopUpContainer = styled(cs.CenteringDiv).attrs({
   position: absolute;
   top: 0px;
   left: 0px;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.3);
 `
 
 export const PopUp = styled(cs.CenteringDiv)`
+  text-align: center;
   width: 30%;
   height: 30%;
   border-radius: 20px;
   background-color: black;
-  color: white;
-  font-size: 2em;
   position: relative;
+  padding: 10px;
+  ${cs.media.phone`
+  width: 70%;
+  height: 40%;
+  `};
 `

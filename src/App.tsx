@@ -58,7 +58,7 @@ class App extends React.Component<{}, State> {
       <s.PopUpContainer>
         <s.PopUp>
           <s.CloseButton onClick={this.closePopUp}>X</s.CloseButton>
-          {popUpValue}
+          <cs.ColoredText color="white">{popUpValue}</cs.ColoredText>
         </s.PopUp>
       </s.PopUpContainer>
     )

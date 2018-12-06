@@ -138,18 +138,18 @@ class Game extends React.Component<Props, State> {
 
   handlePlayerMove = (cellID: number, moveBySelf: boolean) => {
 
-    if (moveBySelf && this.state.gameMode === GameMode.MultiPlayer) {
-      this.props.sendPlayerMoveCellIDToOpponent!(cellID)
-    }
-
     const currentPlayer = this.state.nextPlayer
     
     const {boardState, gameResult} = this.state
     
     const symbolOfCurrPlayer = this.getSymbolOfPlayer(currentPlayer)
     
-    if (boardState[cellID] !== null) {
+    if (boardState[cellID] !== null || gameResult.resultType === "win") {
       return
+    }
+
+    if (moveBySelf && this.state.gameMode === GameMode.MultiPlayer) {
+      this.props.sendPlayerMoveCellIDToOpponent!(cellID)
     }
     
     const newBoardState = boardState.slice()
