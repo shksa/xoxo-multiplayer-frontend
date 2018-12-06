@@ -250,13 +250,13 @@ class Game extends React.Component<Props, State> {
     return (
       <s.Game>
         <cs.FlexColumnDiv Hcenter>
-          <cs.ColoredText block bold>
+          <cs.ColoredText bold>
             You are playing as <cs.ColoredText bold color="red">{selfName}</cs.ColoredText>
           </cs.ColoredText>
-          <cs.ColoredText block bold>
+          <cs.ColoredText bold>
             Against <cs.ColoredText bold>{opponentName}</cs.ColoredText>
           </cs.ColoredText>
-          <cs.ColoredText block bold>
+          <cs.ColoredText bold>
             Your symbol: <cs.ColoredText bold>{this.getSymbolOfPlayer(selfPlayerType)} </cs.ColoredText>
           </cs.ColoredText>
         </cs.FlexColumnDiv>

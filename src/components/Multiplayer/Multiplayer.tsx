@@ -529,10 +529,10 @@ class Multiplayer extends React.Component<Props, State> {
               opponentName={this.selectedAvailablePlayer!.name}
               isSelfPlayer1={this.isInitiator}
             />
-            <cs.FlexRowContainer>
-              <cs.ColoredText>Quit match and join the available pool again?</cs.ColoredText>
-              <cs.BasicButton onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
-            </cs.FlexRowContainer>
+            <cs.ColoredText bold>
+              Quit match and join the available pool again? <cs.BasicButton 
+                onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
+            </cs.ColoredText>
             {/* <Chatbox
               allTextMessages={allTextMessages} 
               handleEnter={this.handleEnter}
@@ -632,7 +632,7 @@ class Multiplayer extends React.Component<Props, State> {
         <s.MultiPlayerWrapper>
           <s.AvailablePlayersAndRequestsContainer>
             <cs.FlexColumnDiv Hcenter>
-              <cs.ColoredText block bold>
+              <cs.ColoredText bold>
                 You are playing as <cs.ColoredText bold color="red">{selfName}</cs.ColoredText>
               </cs.ColoredText>
               {this.showAvailablePlayers()}

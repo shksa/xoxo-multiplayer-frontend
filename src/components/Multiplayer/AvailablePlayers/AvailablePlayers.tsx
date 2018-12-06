@@ -31,12 +31,12 @@ const AvailablePlayers = ({availablePlayers, handleAvailablePlayerClick, selecte
               )
             }</s.AvailablePlayersContainer>
           </cs.FlexRowDiv>
-          <cs.ColoredText bold block>Select a player to play with!!!</cs.ColoredText>
+          {selectedAvailablePlayer ? null : <cs.ColoredText bold>Select a player to play with!!!</cs.ColoredText>}
         </cs.FlexColumnDiv> 
         :
         <cs.FlexColumnDiv Hcenter>
           <ThreeBallsLoader width="100" height="100"/>
-          <cs.ColoredText bold block>There are no free players right now, please wait for some time...</cs.ColoredText>
+          <cs.ColoredText bold>There are no free players right now, please wait for some time...</cs.ColoredText>
         </cs.FlexColumnDiv>
       }
     </React.Fragment>

@@ -120,8 +120,8 @@ export const FlexColumnDiv = styled(FlexDiv)<{Hcenter?: boolean, Vcenter?: boole
 
 export const FlexRowDiv = styled(FlexDiv)<{Hcenter?: boolean, Vcenter?: boolean}>`
   flex-direction: row;
-  ${({Hcenter}) => Hcenter && css`justify-content: center`};
-  ${({Vcenter}) => Vcenter && css`align-items: center`};
+  ${({Hcenter}) => Hcenter && `justify-content: center`};
+  ${({Vcenter}) => Vcenter && `align-items: center`};
 `
 
 export const FlexColumnContainer = styled(FlexColumnDiv)`
@@ -143,13 +143,13 @@ export const CenteringDiv = styled(FlexColumnDiv).attrs({
 })`
 `
 
-export const ColoredText = styled<{block?: boolean, color?: string, bold?: boolean, margin?: string}, "span">("span")`
-  display: ${({block}) => block ? "block" : "inline"};
-  color: ${({color}) =>  color};
+export const ColoredText = styled<{block?: boolean, size?: string, color?: string, bold?: boolean}, "span">("span")`
+  text-align: center;
+  display: ${({block}) => block && "block"};
+  color: ${({color}) => color && `${color}`};
   font-weight: ${({bold}) => bold && "bold"};
-  font-size: 1.5em;
-  margin: ${({margin}) => margin}
-`
+  font-size: ${({size}) => size ? `${size}` : "1.5em"};
+`;
 
 type DeviceType = "desktop" | "tablet" | "phone"
 type Media = {[device in DeviceType]: Function}
