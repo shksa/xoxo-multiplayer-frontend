@@ -89,7 +89,7 @@ class Multiplayer extends React.Component<Props, State> {
   basicButtonRef = React.createRef<any>()
   nameInputRef = React.createRef<any>()
   multiPlayerRef = React.createRef<any>()
-  gameComponentChild = React.createRef<Game>()
+  gameComponentChild = React.createRef<any>()
   defaultPlaceholder = "Enter player name"
   onErrorPlaceholder = "Name cannot be empty"
   opponentName =  ""
@@ -499,7 +499,6 @@ class Multiplayer extends React.Component<Props, State> {
   }
 
   showViewBasedOnDataChannelState = () => {
-    const {selfName, allTextMessages, currentOutgoingTextMessage} = this.state
     if (this.dataChannel === null) {
       return
     }
@@ -515,45 +514,46 @@ class Multiplayer extends React.Component<Props, State> {
             </cs.ColoredText>
           )
         }
-
-        
-    
-      case "open":
-        return (
-          <React.Fragment>
-            <Game
-              gameMode={GameMode.MultiPlayer}
-              ref={this.gameComponentChild}
-              sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
-              selfName={selfName}
-              opponentName={this.selectedAvailablePlayer!.name}
-              isSelfPlayer1={this.isInitiator}
-            />
-            <cs.ColoredText bold>
-              Quit match and join the available pool again? <cs.BasicButton 
-                onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
-            </cs.ColoredText>
-            {/* <Chatbox
-              allTextMessages={allTextMessages} 
-              handleEnter={this.handleEnter}
-              handleSendTextMessageButton={this.handleSendTextMessageButton}
-              currentOutgoingMessage={currentOutgoingTextMessage}
-              handleInputChange={this.handleInputChange}
-            /> */}
-          </React.Fragment>
-        )
+        break;  
+  
 
       case "connecting":
-          return (
-            <cs.FlexColumnDiv Hcenter>
-              <BarsLoader width="100" height="100" fill="white"/>
-              <cs.ColoredText bold>Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText> </cs.ColoredText>
-            </cs.FlexColumnDiv>
-          )
+        return (
+          <cs.FlexColumnDiv Hcenter>
+            <BarsLoader width="100" height="100" fill="white"/>
+            <cs.ColoredText bold>Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedAvailablePlayer!.name}</cs.ColoredText> </cs.ColoredText>
+          </cs.FlexColumnDiv>
+        )
 
       default:
         break;
     }
+  }
+
+  showGameAndChat = () => {
+    return (
+      <React.Fragment>
+        <Game
+          gameMode={GameMode.MultiPlayer}
+          ref={this.gameComponentChild}
+          sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
+          selfName={this.state.selfName}
+          opponentName={this.selectedAvailablePlayer!.name}
+          isSelfPlayer1={this.isInitiator}
+        />
+        <cs.ColoredText bold>
+          Quit match and join the available pool again? <cs.BasicButton 
+            onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
+        </cs.ColoredText>
+        {/* <Chatbox
+          allTextMessages={allTextMessages} 
+          handleEnter={this.handleEnter}
+          handleSendTextMessageButton={this.handleSendTextMessageButton}
+          currentOutgoingMessage={currentOutgoingTextMessage}
+          handleInputChange={this.handleInputChange}
+        /> */}
+      </React.Fragment>
+    )
   }
 
   showAvailablePlayers = () => {
@@ -610,6 +610,7 @@ class Multiplayer extends React.Component<Props, State> {
     console.log("state in render: ", this.state)
     const {selfName, placeholderForPlayerNameEle, isInAvailablePlayersRoom}= this.state
     const showJoiningForm = isInAvailablePlayersRoom === false && this.dataChannel === null ? true : false
+    const isConnectedWithOpponent = this.dataChannel !== null && this.dataChannel.readyState === "open"
     console.log("showJoiningForm: ", showJoiningForm)
     return (
       <s.MultiPlayer ref={this.multiPlayerRef}>
@@ -630,16 +631,21 @@ class Multiplayer extends React.Component<Props, State> {
         </s.JoiningForm>
         :
         <s.MultiPlayerWrapper>
-          <s.AvailablePlayersAndRequestsContainer>
-            <cs.FlexColumnDiv Hcenter>
-              <cs.ColoredText bold>
-                You are playing as <cs.ColoredText bold color="red">{selfName}</cs.ColoredText>
-              </cs.ColoredText>
-              {this.showAvailablePlayers()}
-            </cs.FlexColumnDiv>
-            {this.showRequestsFromPlayers()}
-          </s.AvailablePlayersAndRequestsContainer>
-          {this.showViewBasedOnDataChannelState()}
+          {
+          isConnectedWithOpponent ? this.showGameAndChat() :
+          <React.Fragment>
+            <s.AvailablePlayersAndRequestsContainer>
+              <cs.FlexColumnDiv Hcenter>
+                <cs.ColoredText bold>
+                  You are playing as <cs.ColoredText bold color="red">{selfName}</cs.ColoredText>
+                </cs.ColoredText>
+                {this.showAvailablePlayers()}
+              </cs.FlexColumnDiv>
+              {this.showRequestsFromPlayers()}
+            </s.AvailablePlayersAndRequestsContainer>
+            {this.showViewBasedOnDataChannelState()}
+          </React.Fragment>
+          }
         </s.MultiPlayerWrapper>
         }
       </s.MultiPlayer>

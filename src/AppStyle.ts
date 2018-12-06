@@ -12,7 +12,13 @@ export const GlobalStyle = createGlobalStyle`
   }
 `;
 
-export const Theme: ThemeInterface = {primaryColor: "white", primaryColorInverted: "black", bgColor: "white"}
+export const Theme: ThemeInterface = {
+  primaryColor: "white", 
+  primaryColorInverted: "black", 
+  bgColor: "white",
+  playerOneColor: "red",
+  playerTwoColor: "blue"
+}
 
 export const AppWrapper = styled(cs.FlexColumnDiv)`
   height: 100vh;

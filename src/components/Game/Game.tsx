@@ -3,6 +3,8 @@ import Board from './Board/Board';
 import * as s from './style'
 import * as cs from '../common';
 import { GameMode } from '../../App';
+import {withTheme} from '../../styled-components'
+import ThemeInterface from '../../theme';
 
 export enum PlayerSymbol {
   X = "X",
@@ -16,7 +18,7 @@ interface PlayerInfo {
 // When all members in an enum have literal values, special semantics come into play.
 // 1. First is that enum members become types as well.
 // 2. Second is that the enum type effectively becomes the union of each enum member.
-enum PlayerType {
+export enum PlayerType {
   Player1 = "Player1", // Player1 is an enum member which has a constant value "Player1" associated with it, a constant enum member.
   Player2 = "Player2",
 }
@@ -68,9 +70,13 @@ interface Props {
   selfName: string
   opponentName: string
   sendPlayerMoveCellIDToOpponent?: (cellID: number) => void
+  theme: ThemeInterface
 }
 
 class Game extends React.Component<Props, State> {
+
+  colorForSelf: string
+  colorForOpponent: string
 
   constructor(props: Props) {
     super(props)
@@ -94,6 +100,8 @@ class Game extends React.Component<Props, State> {
       gameResult,
       isGameEnded: false
     }
+    this.colorForSelf = props.isSelfPlayer1 ? props.theme.playerOneColor : props.theme.playerTwoColor
+    this.colorForOpponent =  this.colorForSelf === props.theme.playerOneColor ? props.theme.playerTwoColor : props.theme.playerOneColor
   }
 
   togglePlayer = (player: PlayerType) : PlayerType => {
@@ -219,6 +227,7 @@ class Game extends React.Component<Props, State> {
   render() {
     // nextPlayer is the player that is gonna play now.
     const {selfName, nextPlayer, boardState, history, moveInHistory, gameResult, opponentName, selfPlayerType, opponentPlayerType} = this.state
+    const symbolOfSelf = this.getSymbolOfPlayer(selfPlayerType)
     let gameStatusMessage;
     let waitForOpponentMove = false;
     switch (gameResult.resultType) {
@@ -238,7 +247,7 @@ class Game extends React.Component<Props, State> {
       case "neither":
         waitForOpponentMove = nextPlayer === opponentPlayerType
         if (waitForOpponentMove) {
-          gameStatusMessage = <cs.ColoredText bold>Waiting for <cs.ColoredText color="blue" bold>{opponentName}</cs.ColoredText> to make a move...</cs.ColoredText> 
+          gameStatusMessage = <cs.ColoredText bold>Waiting for <cs.ColoredText color={this.colorForOpponent} bold>{opponentName}</cs.ColoredText> to make a move...</cs.ColoredText> 
         } else {
           gameStatusMessage = <cs.ColoredText bold>Make a move!!</cs.ColoredText>
         }
@@ -251,13 +260,13 @@ class Game extends React.Component<Props, State> {
       <s.Game>
         <cs.FlexColumnDiv Hcenter>
           <cs.ColoredText bold>
-            You are playing as <cs.ColoredText bold color="red">{selfName}</cs.ColoredText>
+            You are playing as <cs.ColoredText bold color={this.colorForSelf}>{selfName}</cs.ColoredText>
           </cs.ColoredText>
           <cs.ColoredText bold>
-            Against <cs.ColoredText bold>{opponentName}</cs.ColoredText>
+            Against <cs.ColoredText bold color={this.colorForOpponent}>{opponentName}</cs.ColoredText>
           </cs.ColoredText>
           <cs.ColoredText bold>
-            Your symbol: <cs.ColoredText bold>{this.getSymbolOfPlayer(selfPlayerType)} </cs.ColoredText>
+            Your symbol: <cs.ColoredText bold color={this.colorForSelf}>{symbolOfSelf}</cs.ColoredText>
           </cs.ColoredText>
         </cs.FlexColumnDiv>
         <cs.FlexColumnDiv Hcenter>
@@ -293,4 +302,4 @@ class Game extends React.Component<Props, State> {
   }
 }
 
-export default Game;
+export default withTheme(Game);

@@ -1,8 +1,9 @@
 import styled from '../../../styled-components';
 import * as cs from '../../common'
 
-export const Board = styled.div`
+export const Board = styled(cs.FlexColumnDiv)`
   position: relative;
+  margin: 15px;
 `;
 
 export const Overlay = styled(cs.CenteringDiv).attrs({
@@ -11,7 +12,7 @@ export const Overlay = styled(cs.CenteringDiv).attrs({
   display: none;
   ${({waitForOpponentMove}) => waitForOpponentMove && `
   display: flex;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.3);
   position: absolute;
   top: 0px;
   left: 0px;

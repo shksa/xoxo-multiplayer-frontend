@@ -1,4 +1,5 @@
 import styled, {keyframes, css} from '../styled-components'
+import { PlayerType } from './Game/Game';
 
 export const EverChanging = (transitionProp : string) => css`
   transition-property: ${transitionProp};
@@ -145,8 +146,8 @@ export const CenteringDiv = styled(FlexColumnDiv).attrs({
 
 export const ColoredText = styled<{block?: boolean, size?: string, color?: string, bold?: boolean}, "span">("span")`
   text-align: center;
+  color: ${({color}) => color};
   display: ${({block}) => block && "block"};
-  color: ${({color}) => color && `${color}`};
   font-weight: ${({bold}) => bold && "bold"};
   font-size: ${({size}) => size ? `${size}` : "1.5em"};
 `;
