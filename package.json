@@ -63,7 +63,9 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "predeploy": "yarn build",
-    "deploy": "zsh deploy/deploy.sh"
+    "deploy": "zsh deploy/deploy.sh",
+    "predeployToGH": "yarn build",
+    "deployToGH": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -83,6 +85,7 @@
     "@types/socket.io-client": "^1.4.32",
     "@types/styled-components": "^4.0.3",
     "babel-plugin-styled-components": "^1.8.0",
+    "gh-pages": "^2.0.1",
     "http-proxy-middleware": "^0.19.1",
     "typescript": "^3.1.6"
   },
