@@ -65,7 +65,7 @@
     "predeploy": "yarn build",
     "deploy": "zsh deploy/deploy.sh",
     "predeployToGH": "yarn build",
-    "deployToGH": "gh-pages -d build"
+    "deployToGH": "gh-pages --dist build --repo https://github.com/shksa/xoxo-multiplayer.git"
   },
   "eslintConfig": {
     "extends": "react-app"
