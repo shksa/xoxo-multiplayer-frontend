@@ -1,7 +1,6 @@
 import React from 'react';
 import * as s from './AppStyle'
 import Multiplayer from './components/Multiplayer/Multiplayer';
-import StartScreen from './components/StartScreen/StartScreen';
 import Game from './components/Game/Game';
 import { ThemeProvider, css } from "./styled-components";
 import * as cs from './components/common'
@@ -20,7 +19,7 @@ class App extends React.Component<{}, State> {
   constructor() {
     super({});
     this.state = {
-      popUpValue: null, gameMode: null
+      popUpValue: null, gameMode: GameMode.MultiPlayer
     }
   }
 
@@ -32,19 +31,10 @@ class App extends React.Component<{}, State> {
 
   showViewBasedOnGameMode = (gameMode: GameMode | null) => { // GameMode is a union of SinglePlayer and MultiPlayer type
     switch (gameMode) {
-      case GameMode.SinglePlayer: // Here, the enum member is used as value
-        return (
-          <Game gameMode={GameMode.SinglePlayer} opponentName="Vegana" selfName="Bob" isSelfPlayer1 />
-        )
 
       case GameMode.MultiPlayer:
         return (
           <Multiplayer showPopUp={this.showPopUp}  />
-        )
-
-      case null:
-        return (
-          <StartScreen gameModeSelectionButtonHandler={this.gameModeSelectionButtonHandler} />
         )
     
       default:

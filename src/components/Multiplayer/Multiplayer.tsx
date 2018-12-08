@@ -652,7 +652,7 @@ class Multiplayer extends React.Component<Props, State> {
           </cs.BasicButton>
         </s.JoiningForm>
         :
-        <s.MultiPlayerWrapper>
+        <React.Fragment>
           {
           isConnectedWithOpponent ? this.showGameAndChat() :
           <React.Fragment>
@@ -668,7 +668,7 @@ class Multiplayer extends React.Component<Props, State> {
             {this.showViewBasedOnDataChannelState()}
           </React.Fragment>
           }
-        </s.MultiPlayerWrapper>
+        </React.Fragment>
         }
       </s.MultiPlayer>
     );

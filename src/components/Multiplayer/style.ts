@@ -2,16 +2,11 @@ import styled, {css} from '../../styled-components';
 import * as cs from '../common'
 
 export const MultiPlayer = styled(cs.CenteringDiv).attrs({
-  fitContainer: true,
   transitionProp: "background-color"
 })`
+  flex-grow: 1;
 `;
 
-export const MultiPlayerWrapper = styled(cs.FlexColumnDiv).attrs({
-  Hcenter: true,
-})`
-  max-width: 100%;
-`;
 
 export const AvailablePlayersAndRequestsContainer = styled(cs.FlexRowDiv)`
   align-items: center;
@@ -20,14 +15,16 @@ export const AvailablePlayersAndRequestsContainer = styled(cs.FlexRowDiv)`
   `};
 `
 
-export const JoiningForm = styled(cs.FlexRowDiv)``
+export const JoiningForm = styled(cs.FlexRowDiv)`
+  margin: 0 10px 0 10px;
+`
 
 export const NameInput = styled(cs.BasicInputField).attrs({
   levitate: true,
   placeholderColor: "black",
   transitionProp: "background-color",
 })`
-  margin: 0 10px 0 10px;
+  margin-right: 10px;
 `;
 
 
