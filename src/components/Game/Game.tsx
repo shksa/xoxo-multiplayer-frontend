@@ -270,19 +270,17 @@ class Game extends React.Component<Props, State> {
     }
     return (
       <s.Game>
-        <cs.FlexRowDiv>
-          <cs.FlexColumnDiv Hcenter>
+        <s.AvatarContainer>
+          <cs.FlexRowDiv Vcenter cssStyle={`justify-content: space-evenly`}>
             <s.Avatar src={selfAvatar} />
-            <cs.ColoredText bold color={colorForSelf}>You - {symbolOfSelf}</cs.ColoredText>
-          </cs.FlexColumnDiv>
-          <cs.FlexColumnDiv cssStyle={`margin: 0em 1.5em; padding-top: 2.5em;`}>
             <cs.ColoredText bold>VS</cs.ColoredText>
-          </cs.FlexColumnDiv>
-          <cs.FlexColumnDiv Hcenter>
             <s.Avatar src={opponentAvatar} />
+          </cs.FlexRowDiv>
+          <cs.FlexRowDiv cssStyle={`justify-content: space-around`}>
+            <cs.ColoredText bold color={colorForSelf}>You - {symbolOfSelf}</cs.ColoredText>
             <cs.ColoredText bold color={colorForOpponent}>{opponentName} - {symbolOfOpponent}</cs.ColoredText>
-          </cs.FlexColumnDiv>
-        </cs.FlexRowDiv>
+          </cs.FlexRowDiv>
+        </s.AvatarContainer>
         <cs.FlexColumnDiv Hcenter>
           <cs.CenteringDiv height="6em">
             {gameStatusMessage}
@@ -295,10 +293,8 @@ class Game extends React.Component<Props, State> {
           />
         </cs.FlexColumnDiv>
         <s.History>
-          <s.Move>
-            <cs.BasicButton levitate onClick={() => this.goBackToMove(0, true)}>
-              Go to Game start
-            </cs.BasicButton>
+          <s.Move levitate onClick={() => this.goBackToMove(0, true)}>
+            Go to Game start
           </s.Move>
           {
           Array.from(history.keys()).map((moveNum) => (

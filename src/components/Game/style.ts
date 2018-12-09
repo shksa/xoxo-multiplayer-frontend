@@ -6,6 +6,7 @@ export const Game = styled(cs.FlexRowDiv)`
   ${cs.media.phone`
     flex-direction: column;
     max-width: 100%;
+    align-items: unset;
   `}
   /* max-width: 100%; */
 `;
@@ -20,6 +21,13 @@ export const History = styled(cs.FlexColumnDiv)`
     margin-left: 0px;
   `}
 `;
+
+export const AvatarContainer = styled(cs.FlexColumnDiv)`
+  width: 45%;
+  ${cs.media.phone`
+    width: unset;
+  `}
+`
 
 export const Move = styled(cs.BasicButton)`
   margin: 20px;
