@@ -16,8 +16,8 @@ export const Theme: ThemeInterface = {
   primaryColor: "white", 
   primaryColorInverted: "black", 
   bgColor: "white",
-  playerOneColor: "red",
-  playerTwoColor: "blue"
+  playerOneColor: "#eb4d4b",
+  playerTwoColor: "#0984e3"
 }
 
 export const AppWrapper = styled(cs.FlexRowDiv)`

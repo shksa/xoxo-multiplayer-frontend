@@ -18,10 +18,7 @@ export interface AvailablePlayer {
 
 export type socketID = string
 
-export interface SelectedOpponent {
-  name: string
-  socketID: socketID
-}
+export interface SelectedOpponent extends AvailablePlayer {}
 
 interface SocketResponse {
   message: string
@@ -424,7 +421,7 @@ class Multiplayer extends React.Component<Props, State> {
         }
         console.log(resp)
         this.setState({
-          isInAvailablePlayersRoom: false, availablePlayers: [], requestsFromPlayers: new Map(),
+          isInAvailablePlayersRoom: false, 
           connectionStatus: {socketID: this.selectedOpponent!.name, status: "open"}
         })
       })
@@ -438,7 +435,7 @@ class Multiplayer extends React.Component<Props, State> {
       console.log('Data channel closed.');
       if (this.state.isInAvailablePlayersRoom) {
         // This block is executed when the player's request is rejected
-        this.props.showPopUp(`Player rejected your invite`)
+        this.props.showPopUp(`${this.selectedOpponent!.name} rejected your invite`)
         this.selectedOpponent = null
         this.dataChannel = null
         this.setState({connectionStatus: null})
@@ -508,15 +505,15 @@ class Multiplayer extends React.Component<Props, State> {
     })
   }
 
-  rejectPeerRequest = (peerSocketID: socketID) => {
-    this.sendRejectionResponseToPeers([peerSocketID])
+  rejectPlayerRequest = (player: AvailablePlayer) => {
+    this.sendRejectionResponseToPeers([player.socketID])
   }
 
-  acceptPeerRequest = (peerSocketID: socketID) => {
-    const peerSignal = this.state.requestsFromPlayers.get(peerSocketID) as PeerSignal
-    const peersToReject = Array.from(this.state.requestsFromPlayers.keys()).filter((socketID) => socketID !== peerSocketID)
+  acceptPlayerRequest = (player: AvailablePlayer) => {
+    const peerSignal = this.state.requestsFromPlayers.get(player.socketID) as PeerSignal
+    const peersToReject = Array.from(this.state.requestsFromPlayers.keys()).filter((socketID) => socketID !== player.socketID)
     this.sendRejectionResponseToPeers(peersToReject)
-    this.selectedOpponent = {name: peerSignal.name, socketID: peerSignal.socketID}
+    this.selectedOpponent = player
     this.isInitiator = false
     this.createPeerConnection(this.isInitiator); // because this client needs to also open RTCPeerConnection to receive the data channel.
     this.processSignalFromRemotePeer(peerSignal.offer)
@@ -568,58 +565,26 @@ class Multiplayer extends React.Component<Props, State> {
     this.dataChannel!.close()
   }
 
-  // showViewBasedOnDataChannelState = () => {
-  //   if (this.dataChannel === null) {
-  //     return
-  //   }
-
-  //   const {readyState} = this.dataChannel
-
-  //   switch (readyState) {
-  //     case "closed":
-  //       if (this.state.isInAvailablePlayersRoom) {
-  //         return (
-  //           <cs.ColoredText>
-  //             <cs.ColoredText color="red">{this.selectedOpponent!.name}</cs.ColoredText> has <cs.ColoredText color="red">REJECTED</cs.ColoredText> your request to play. Choose another player.
-  //           </cs.ColoredText>
-  //         )
-  //       }
-  //       break;  
-  
-
-  //     case "connecting":
-  //       return (
-  //         <s.RequestsAndWaitAndRejectionWrapper>
-  //           <cs.FlexColumnDiv Hcenter>
-  //             <BarsLoader width="100" height="100" fill="white"/>
-  //             <cs.ColoredText bold>
-  //               Waiting to hear back from <cs.ColoredText bold color="blue">{this.selectedOpponent!.name}</cs.ColoredText> 
-  //             </cs.ColoredText>
-  //           </cs.FlexColumnDiv>
-  //         </s.RequestsAndWaitAndRejectionWrapper>
-  //       )
-
-  //     default:
-  //       break;
-  //   }
-  // }
-
   showGameAndChat = () => {
     return (
       <React.Fragment>
-        <Game
-          gameMode={GameMode.MultiPlayer}
-          ref={this.gameComponentChild}
-          sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
-          sendRestartSignalToOpponent={this.sendRestartSignalToOpponent}
-          selfName={this.state.selfName}
-          opponentName={this.selectedOpponent!.name}
-          isSelfPlayer1={this.isInitiator}
-        />
-        <cs.ColoredText bold>
-          Quit match and join the available pool again? <cs.BasicButton 
-            onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
-        </cs.ColoredText>
+        <cs.FlexColumnDiv Hcenter limitSizeToContainer cssStyle={`overflow: scroll;`}>
+          <Game
+            gameMode={GameMode.MultiPlayer}
+            ref={this.gameComponentChild}
+            sendPlayerMoveCellIDToOpponent={this.sendPlayerMoveCellIDToOpponent}
+            sendRestartSignalToOpponent={this.sendRestartSignalToOpponent}
+            selfName={this.state.selfName}
+            opponentName={this.selectedOpponent!.name}
+            selfAvatar={this.state.avatarImage}
+            opponentAvatar={this.selectedOpponent!.avatar}
+            isSelfPlayer1={this.isInitiator}
+          />
+          <cs.ColoredText bold>
+            Quit match and join the available pool again? <cs.BasicButton 
+              onClick={this.handleQuitMatchAndGoBackToAvailablePool}>Yes</cs.BasicButton>
+          </cs.ColoredText>
+        </cs.FlexColumnDiv>
         {/* <Chatbox
           allTextMessages={allTextMessages} 
           handleEnter={this.handleEnter}
@@ -645,8 +610,8 @@ class Multiplayer extends React.Component<Props, State> {
         availablePlayers={availablePlayersExceptSelf}
         connectionStatus={connectionStatus}
         requests={requestsMap}
-        acceptPeerConnection={this.acceptPeerRequest}
-        rejectPeerConnection={this.rejectPeerRequest}
+        acceptPlayerRequest={this.acceptPlayerRequest}
+        rejectPlayerRequest={this.rejectPlayerRequest}
       />
     )
   }
@@ -663,7 +628,7 @@ class Multiplayer extends React.Component<Props, State> {
   render() {
     console.log("state in render: ", this.state)
     const {selfName, connectionStatus, avatarImage, placeholderForPlayerNameEle, isInAvailablePlayersRoom}= this.state
-    const showJoiningForm = isInAvailablePlayersRoom === false && this.dataChannel === null ? true : false
+    const showJoiningForm = isInAvailablePlayersRoom === false && connectionStatus === null
     const isConnectedWithOpponent = connectionStatus !== null && connectionStatus.status === "open"
     console.log("showJoiningForm: ", showJoiningForm)
     return (

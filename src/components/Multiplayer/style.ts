@@ -3,7 +3,7 @@ import * as cs from '../common'
 
 export const MultiPlayer = styled(cs.CenteringDiv).attrs({
   transitionProp: "background-color",
-  fitContainer: true
+  fitContainer: true,
 })`
   position: relative;
   padding: 0.9em;

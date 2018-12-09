@@ -125,7 +125,7 @@ export const BasicInputField = styled<{blackTextAndWhiteBackground?: boolean, wh
   ${({transitionProp}) => transitionProp && ContinousTransition(transitionProp)};
 `;
 
-const FlexDiv = styled<{levitate?: boolean, fitContainer?: boolean, transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
+const FlexDiv = styled<{limitSizeToContainer?: boolean, levitate?: boolean, fitContainer?: boolean, transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
   display: flex;
   box-sizing: border-box;
   ${({height}) => height && `height: ${height}`};
@@ -134,6 +134,10 @@ const FlexDiv = styled<{levitate?: boolean, fitContainer?: boolean, transitionPr
   ${({fitContainer}) => fitContainer && `
   width: 100%;
   height: 100%;
+  `};
+  ${({limitSizeToContainer}) => limitSizeToContainer && `
+  max-width: 100%;
+  max-height: 100%;
   `};
   ${({levitate}) => levitate && LevitateBoxAnimation};
   ${({transitionProp}) => transitionProp && ContinousTransition(transitionProp)};

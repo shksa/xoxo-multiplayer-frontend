@@ -43,7 +43,7 @@ export const InviteOrAcceptorRejectButton = styled(cs.BasicButton).attrs({
         return "#33cc66"
 
       case "invite":
-        return "#3FEEE6"
+        return "#6c5ce7"
 
       case "reject":
         return "#FC4445"

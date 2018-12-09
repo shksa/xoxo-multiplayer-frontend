@@ -11,14 +11,14 @@ interface Props {
   invitePlayer: (availablePlayer: AvailablePlayer) => void
   connectionStatus: ConnnectionInfo | null
   requests: RequestsFromPlayers
-  acceptPeerConnection: (peerSocketID: string) => void
-  rejectPeerConnection: (peerScocketID: string) => void
+  acceptPlayerRequest: (player: AvailablePlayer) => void
+  rejectPlayerRequest: (player: AvailablePlayer) => void
 }
 
 class AvailablePlayersRoom extends React.Component<Props, {}> {
 
   render() {
-    const {availablePlayers, rejectPeerConnection, acceptPeerConnection, connectionStatus, invitePlayer, requests} = this.props
+    const {availablePlayers, rejectPlayerRequest, acceptPlayerRequest, connectionStatus, invitePlayer, requests} = this.props
     return (
       <React.Fragment>
         {
@@ -50,11 +50,11 @@ class AvailablePlayersRoom extends React.Component<Props, {}> {
                   <cs.FlexRowDiv>
                     <s.InviteOrAcceptorRejectButton 
                     actionType="accept" 
-                    onClick={() => acceptPeerConnection(player.socketID)}
+                    onClick={() => acceptPlayerRequest(player)}
                   >Accept</s.InviteOrAcceptorRejectButton> 
                   <s.InviteOrAcceptorRejectButton 
                     actionType="reject" 
-                    onClick={() => rejectPeerConnection(player.socketID)}
+                    onClick={() => rejectPlayerRequest(player)}
                   >Reject</s.InviteOrAcceptorRejectButton>
                   </cs.FlexRowDiv> :
                   <s.InviteOrAcceptorRejectButton 
