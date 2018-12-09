@@ -147,20 +147,91 @@ const StandardHTMLColorNames = [
   "YellowGreen"
   ]
 
-const colorNameGenerator = (function* () {
+function shuffleArray(array: Array<string>) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+const ModernColors = [
+"#edd9c0",
+"#c9d8c5",
+"#a8b6bf",
+"#7d4627",
+"#6ed3cf",
+"#9068be",
+"#e62739",
+"#9ad3de",
+"#89bdd3",
+"#fae596",
+"#3fb0ac",
+"#173e43",
+"#e6cf8b",
+"#b56969",
+"#22264b",
+"#98dafc",
+"#daad86",
+"#312c32",
+"#1d2120",
+"#5a5c51",
+"#ba9077",
+"#bcd5d1",
+"#729f98",
+"#283018",
+"#aa863a",
+"#c2d4d8",
+"#b0aac2",
+"#6534ff",
+"#62bcfa",
+"#fccdd3",
+"#bbc4ef",
+"#dbc3d0",
+"#5e0231",
+"#c7a693",
+"#856046",
+"#e6af4b",
+"#e05038",
+"#f2cbbc",
+"#334431",
+"#300032",
+"#06000a",
+"#c43235",
+"#16174f",
+"#963019",
+"#262216",
+"#97743a",
+"#30231d",
+"#c7ad88",
+"#935347",
+"#252839",
+"#f2b632",
+"#bccbde",
+"#c2dde6",
+"#e6e9f0",
+"#431c5d",
+"#e05915",
+"#cdd422",
+]
+
+const colorNameGenerator = (function* (colorsArray: Array<string>) {
   let i = 0
-  while (i < StandardHTMLColorNames.length){
-    yield StandardHTMLColorNames[i]
+  shuffleArray(colorsArray)
+  while (i < colorsArray.length){
+    yield colorsArray[i]
     i += 1
-    if (i === StandardHTMLColorNames.length) {
+    if (i === colorsArray.length) {
       i = 0
+      shuffleArray(colorsArray)
     }
   }
-})()
+})(ModernColors)
+
+export const getNewColor = () => colorNameGenerator.next().value
 
 const setColor = (elementRef: React.RefObject<any>) => () => {
   if (elementRef.current) {
-    elementRef.current.style.backgroundColor = colorNameGenerator.next().value
+    elementRef.current.style.backgroundColor = getNewColor()
   }
 }
 

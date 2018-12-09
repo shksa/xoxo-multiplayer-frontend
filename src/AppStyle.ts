@@ -20,10 +20,13 @@ export const Theme: ThemeInterface = {
   playerTwoColor: "blue"
 }
 
-export const AppWrapper = styled(cs.FlexColumnDiv)`
-  min-height: 100vh;
+export const AppWrapper = styled(cs.FlexRowDiv)`
+  height: 100vh;
   width: 100vw;
   position: relative;
+  ${cs.media.phone`
+  flex-direction: column;
+  `};
 `;
 
 export const CloseButton = styled(cs.BasicButton)`

@@ -1,12 +1,24 @@
 import styled, {keyframes, css} from '../styled-components'
 import { PlayerType } from './Game/Game';
 
-export const EverChanging = (transitionProp : string) => css`
+export const ContinousTransition = (transitionProp : string) => css`
   transition-property: ${transitionProp};
   transition-duration: 1s;
   transition-delay: 0s;
   transition-timing-function: ease-in-out;
 `
+
+const rotate = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+`
+
+export const LowShadow = `box-shadow: 3px 4px 7px gray;`
+export const HighShadow = `box-shadow: 8px 10px 20px gray;`
 
 const levitateText = keyframes`
   0% {
@@ -32,6 +44,13 @@ const levitateBox = keyframes`
   }
 `
 
+export const RotateAnimation = css`
+  animation-name: ${rotate};
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+`
+
 export const LevitateBoxAnimation = css`
   animation-name: ${levitateBox};
   animation-duration: 2s;
@@ -46,45 +65,50 @@ export const LevitateTextAnimation = css`
   animation-timing-function: linear;
 `
 
-const whiteTextAndBlackBackground = css`
+const CSS_whiteTextAndBlackBackground = css`
   background-color: black;
   color: white;
 `
 
-const blackTextAndWhiteBackground = css`
+const CSS_blackTextAndWhiteBackground = css`
   background-color: white;
   color: black;
 `
 
-export const BasicButton = styled<{transitionProp?:string, whiteTextBlackBg?: boolean, levitate?: boolean, isClicked?: boolean}, "button">("button")`
+export const BasicButton = styled<{whiteTextAndBlackBackground?: boolean, blackTextAndWhiteBackground?: boolean, transitionProp?:string, levitate?: boolean, isClicked?: boolean}, "button">("button")`
   padding: 10px;
   font-size: 1em;
   font-weight: bold;
   border: 2px solid black;
-  border-radius: 20px;
+  border-radius: 1em;
+  box-sizing: border-box;
   cursor: pointer;
-  outline: none;  
-  ${blackTextAndWhiteBackground};
-  :active {
-    ${whiteTextAndBlackBackground};
-  };
-  ${({whiteTextBlackBg}) => whiteTextBlackBg && `
-    ${whiteTextAndBlackBackground};
+  outline: none;
+  ${({blackTextAndWhiteBackground}) => blackTextAndWhiteBackground && `
+    ${CSS_blackTextAndWhiteBackground};  
     :active {
-      ${blackTextAndWhiteBackground}
+      ${CSS_whiteTextAndBlackBackground};
+    }
+  `};
+  ${({whiteTextAndBlackBackground}) => whiteTextAndBlackBackground && `
+    ${CSS_whiteTextAndBlackBackground};
+    :active {
+      ${CSS_blackTextAndWhiteBackground}
     }
   `};
   ${({levitate}) => levitate && LevitateBoxAnimation};
-  ${({isClicked}) => isClicked && whiteTextAndBlackBackground};
-  ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
+  ${({isClicked}) => isClicked && CSS_whiteTextAndBlackBackground};
+  ${({transitionProp}) => transitionProp && ContinousTransition(transitionProp)};
 `
 
-export const BasicInputField = styled<{transitionProp?:string, levitate?: boolean, placeholderColor?: string}, "input">("input")`
+export const BasicInputField = styled<{blackTextAndWhiteBackground?: boolean, whiteTextAndBlackBackground?: boolean, transitionProp?:string, levitate?: boolean, placeholderColor?: string}, "input">("input")`
   padding: 5px;
   font-size: 1em;
   font-weight: bold;
   border-radius: 10px;
   border: 2px solid black;
+  ${({whiteTextAndBlackBackground}) => whiteTextAndBlackBackground && CSS_whiteTextAndBlackBackground};
+  ${({blackTextAndWhiteBackground}) => blackTextAndWhiteBackground && CSS_blackTextAndWhiteBackground};
   outline: none;
   ${({levitate}) => levitate && LevitateBoxAnimation};
   ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -98,11 +122,12 @@ export const BasicInputField = styled<{transitionProp?:string, levitate?: boolea
   ::-ms-input-placeholder { /* Microsoft Edge */
       color: ${({placeholderColor}) => placeholderColor};
   };
-  ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
+  ${({transitionProp}) => transitionProp && ContinousTransition(transitionProp)};
 `;
 
-const FlexDiv = styled<{fitContainer?: boolean, transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
+const FlexDiv = styled<{levitate?: boolean, fitContainer?: boolean, transitionProp?: string, height?: string, width?: string, cssStyle?: string}, "div">("div")`
   display: flex;
+  box-sizing: border-box;
   ${({height}) => height && `height: ${height}`};
   ${({width}) => width && `width: ${width}`};
   ${({cssStyle}) => cssStyle && `${cssStyle}`};
@@ -110,7 +135,8 @@ const FlexDiv = styled<{fitContainer?: boolean, transitionProp?: string, height?
   width: 100%;
   height: 100%;
   `};
-  ${({transitionProp}) => transitionProp && EverChanging(transitionProp)};
+  ${({levitate}) => levitate && LevitateBoxAnimation};
+  ${({transitionProp}) => transitionProp && ContinousTransition(transitionProp)};
 `
 
 export const FlexColumnDiv = styled(FlexDiv)<{Hcenter?: boolean, Vcenter?: boolean}>`
@@ -138,18 +164,19 @@ export const FlexRowContainer = styled(FlexRowDiv)`
   border: 2px solid black;
 `;
 
-export const CenteringDiv = styled(FlexColumnDiv).attrs({
+export const CenteringDiv = styled(FlexRowDiv).attrs({
   Hcenter: true,
   Vcenter: true,
 })`
 `
 
-export const ColoredText = styled<{block?: boolean, size?: string, color?: string, bold?: boolean}, "span">("span")`
+export const ColoredText = styled<{levitateText?: boolean, block?: boolean, size?: string, color?: string, bold?: boolean}, "span">("span")`
   text-align: center;
-  color: ${({color}) => color};
+  color: ${({color}) => color ? color : "white"};
   display: ${({block}) => block && "block"};
   font-weight: ${({bold}) => bold && "bold"};
   font-size: ${({size}) => size ? `${size}` : "1.5em"};
+  ${({levitateText}) => levitateText && LevitateTextAnimation};
 `;
 
 type DeviceType = "desktop" | "tablet" | "phone"
