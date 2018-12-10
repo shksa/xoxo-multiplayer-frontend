@@ -43,7 +43,12 @@ class App extends React.Component<{}, State> {
   }
 
   popUpView = () => {
-    const {popUpValue} = this.state
+    let {popUpValue} = this.state
+    if (popUpValue instanceof Error) {
+      popUpValue = popUpValue.message
+    } else if(typeof popUpValue !== "string") {
+      popUpValue = JSON.stringify(popUpValue)
+    }
     return (
       <s.PopUpContainer>
         <s.PopUp>

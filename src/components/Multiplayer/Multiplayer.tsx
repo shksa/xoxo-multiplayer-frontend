@@ -209,7 +209,6 @@ class Multiplayer extends React.Component<Props, State> {
       avatar = this.defaultAvatarImage
       this.props.showPopUp(JSON.stringify(error))
     }
-    this.setState({avatarImage: avatar})
 
     this.socket = io(this.socketServerAddress, {
       path: '/xoxo-multiplayer-socketConnectionNamespace'
@@ -222,7 +221,10 @@ class Multiplayer extends React.Component<Props, State> {
       this.registerToSocketEvents()
       
       this.socket.emit("registerNameAndAvatarWithSocket", selfName, avatar, (response: SocketResponse) => {
-        console.log(response)
+        if (response.code != 200) {
+          this.props.showPopUp(new Error(response.message))
+          return
+        }
         
         this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
           if (resp.code !== 200) {
@@ -230,7 +232,7 @@ class Multiplayer extends React.Component<Props, State> {
             return
           }
           console.log(resp)
-          this.setState({isInAvailablePlayersRoom: true})
+          this.setState({isInAvailablePlayersRoom: true, avatarImage: avatar})
         });
         
         // TODO: Socket disconnect on window unload or whatever.
@@ -436,22 +438,22 @@ class Multiplayer extends React.Component<Props, State> {
       if (this.state.isInAvailablePlayersRoom) {
         // This block is executed when the player's request is rejected
         this.props.showPopUp(`${this.selectedOpponent!.name} rejected your invite`)
-        this.selectedOpponent = null
-        this.dataChannel = null
-        this.setState({connectionStatus: null})
-        return
+      } else {
+        // The below code is executed when the player quits the match to join avaiable players pool.
+        this.socket = this.socket as SocketIOClient.Socket
+        this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
+          if (resp.code !== 200) {
+            this.props.showPopUp(new Error(resp.message))
+            return
+          }
+          console.log(resp)
+          this.setState({allTextMessages: [], isInAvailablePlayersRoom: true})
+        });
       }
-      // The below code is executed when the player quits the match to join avaiable players pool.
-      this.socket = this.socket as SocketIOClient.Socket
-      this.socket.emit('joinAvailablePlayersRoom', (resp: SocketResponse) => {
-        if (resp.code !== 200) {
-          this.props.showPopUp(new Error(resp.message))
-          return
-        }
-        console.log(resp)
-        this.setState({allTextMessages: [], isInAvailablePlayersRoom: true})
-        this.selectedOpponent = null
-      });
+      this.selectedOpponent = null
+      this.dataChannel = null
+      this.setState({connectionStatus: null})
+      
     }
   
     channel.onmessage = (evt: MessageEvent) => {
