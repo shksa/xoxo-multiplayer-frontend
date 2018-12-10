@@ -10,7 +10,7 @@ import * as utils from '../../utils/util'
 // import {ReactComponent as BarsLoader} from '../../assets/BarsLoader.svg'
 import defaultAvatarImg from '../../assets/defaultAvatar.jpeg'
 
-import 'webrtc-adapter'
+// import 'webrtc-adapter'
 
 export interface AvailablePlayer {
   name: string
