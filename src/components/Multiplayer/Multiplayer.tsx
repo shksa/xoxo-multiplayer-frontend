@@ -3,12 +3,14 @@ import * as s from './style'
 import * as cs from '../common'
 import io from 'socket.io-client';
 import AvailablePlayersRoom from './AvailablePlayersRoom/AvailablePlayersRoom';
-import Chatbox from './ChatBox/Chatbox';
+// import Chatbox from './ChatBox/Chatbox';
 import Game from '../Game/Game';
 import { GameMode } from '../../App';
 import * as utils from '../../utils/util'
-import {ReactComponent as BarsLoader} from '../../assets/BarsLoader.svg'
+// import {ReactComponent as BarsLoader} from '../../assets/BarsLoader.svg'
 import defaultAvatarImg from '../../assets/defaultAvatar.jpeg'
+
+import 'webrtc-adapter'
 
 export interface AvailablePlayer {
   name: string
